@@ -9,6 +9,8 @@ Skills that make coding agents (Claude Code, Codex) follow the team's Sync by Re
 | `sync-init` | Write the team's Sync rules into a repo's `AGENTS.md` and connect `CLAUDE.md` to it. Run once per repo, or again when the rules change. |
 | `sync-start-ticket <KEY>` | Check out the ticket branch and push it. The push moves the ticket to IN_PROGRESS. |
 | `sync-complete-ticket [KEY]` | Verify, commit, push and open a PR (which moves the ticket to IN_REVIEW), then comment on the ticket. You have to invoke it yourself. |
+| `sync-docs <handoff\|adr\|prd\|runbook\|postmortem\|meeting\|roadmap\|blank\|search\|update\|publish> [title-or-query] [--ticket KEY] [--project NAME]` | Write project docs in Sync Knowledge from a template, link them to the ticket, and publish after you approve. |
+| `sync-plan-from-doc <path-or-doc-id> [--project NAME]` | Read a PRD or project doc, propose the project, milestones, tickets, assignees and repo, and create them after you approve. |
 | `sync-digest` | Show what's on your plate: open tickets, overdue or due-soon tickets, incident reviews waiting on you, and PRs waiting for your review. Read-only. |
 | `sync-projects` | Compare a project's tickets with a schedule or plan, show a before/after table, and apply dates, descriptions and comments after you confirm. |
 | `sync-timeline` | Map a schedule onto ticket dates and flag conflicts with dependencies, milestones and the project dates. |
@@ -132,7 +134,7 @@ $env:SYNC_HOOKS = "off"
 
 ### Codex
 
-Codex plugins support hooks (checked against the Codex hooks documentation on 2026-10-22). Codex reads the same `hooks/hooks.json` from the plugin root and gives hook commands the plugin root as `PLUGIN_ROOT`, plus `CLAUDE_PLUGIN_ROOT` for compatibility. Codex skips plugin hooks until you review and trust them, so after installing the plugin run `/hooks` once.
+Codex has a hooks feature (checked against the Codex hooks documentation on 2026-10-22), but Codex's plugin build documentation lists lifecycle hooks only for manually installed desktop plugins. Whether a plugin installed from a marketplace runs these hooks is unverified. If hooks do run, Codex reads the same `hooks/hooks.json` from the plugin root and gives hook commands the plugin root as `PLUGIN_ROOT`, plus `CLAUDE_PLUGIN_ROOT` for compatibility. Codex skips plugin hooks until you review and trust them, so after installing the plugin run `/hooks` once.
 
 The Codex side is untested on a real install, in particular on Windows, where the quoted `${CLAUDE_PLUGIN_ROOT}` in the hook command may not expand. The check that looks for Sync calls in the Codex transcript is a best effort; if it misses one, the worst case is one extra reminder per session.
 
