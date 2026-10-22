@@ -11,8 +11,7 @@ permissions:
 
 jobs:
   release:
-    # Runner milik RedPumpkin; pemicunya hanya tag v* (tag dilindungi ruleset, hanya pemilik).
-    runs-on: [self-hosted, redpumpkin-platform]
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
       # Hanya job ini yang boleh menulis, dan hanya untuk membuat Release.
@@ -31,15 +30,7 @@ jobs:
         run: node scripts/check.mjs
       - name: Pemeriksaan rilis (tag sama dengan versi manifest, CHANGELOG final)
         run: node scripts/check.mjs --release "$TAG" --notes-out "$RUNNER_TEMP/notes.md"
-      # Runner tidak punya gh CLI (hanya curl + jq), jadi Release dibuat lewat REST API.
-      # Tag sudah ada (workflow ini dipicu olehnya), jadi API memakainya apa adanya.
       - name: Buat GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          jq -n --arg tag "$TAG" --rawfile body "$RUNNER_TEMP/notes.md" \
-            '{tag_name: $tag, name: $tag, body: $body}' > "$RUNNER_TEMP/release.json"
-          curl -fsS -X POST "https://api.github.com/repos/$GITHUB_REPOSITORY/releases" \
-            -H "Authorization: Bearer $GH_TOKEN" \
-            -H "Accept: application/vnd.github+json" \
-            -d @"$RUNNER_TEMP/release.json"
+        run: gh release create "$TAG" --title "$TAG" --notes-file "$RUNNER_TEMP/notes.md" --verify-tag

@@ -34,7 +34,6 @@ export const ALLOWED_CLIENT_IDS = ["sync-mcp-cli", "sync-mcp-inspector-claude"];
 export const ALLOWED_URL_HOSTS = [
   "sync.redpumpkin.ai",
   "github.com",
-  "api.github.com", // release.yml membuat Release lewat REST API (runner tanpa gh CLI)
   "agent-plugins.org",
   "127.0.0.1",
   "localhost",
@@ -387,21 +386,15 @@ function checkWorkflow(root, r) {
   }
   // Dirakit dari potongan agar skrip ini tidak memuat pemicu terlarang secara harfiah.
   const forbiddenTrigger = ["pull_request", "target"].join("_");
-  // Runner milik RedPumpkin (billing GitHub-hosted habis). Repo ini publik, jadi runner ini
-  // hanya aman bila PR dari fork tidak pernah sampai ke sana: lihat FORK_GUARD di bawah.
-  const allowedRunner = "[self-hosted, redpumpkin-platform]";
-  const forkGuard = "github.event.pull_request.head.repo.full_name == github.repository";
+  const forbiddenRunner = ["self", "hosted"].join("-");
   for (const f of files) {
     const text = readText(root, f);
     const problems = [];
     if (text.includes(forbiddenTrigger)) problems.push(`pemicu ${forbiddenTrigger} dilarang`);
+    if (text.includes(forbiddenRunner)) problems.push(`runner ${forbiddenRunner} dilarang`);
     const runners = [...text.matchAll(/^\s*runs-on:\s*(.+?)\s*$/gm)].map((m) => m[1]);
     if (!runners.length) problems.push("tidak ada runs-on");
-    for (const runner of runners) if (runner !== allowedRunner) problems.push(`runs-on "${runner}" harus ${allowedRunner}`);
-    // ponytail: cukup cek keberadaan string; bila workflow punya banyak job, tiap job butuh guard sendiri.
-    if (/^\s{2}pull_request:/m.test(text) && !text.includes(forkGuard)) {
-      problems.push(`workflow dengan pemicu pull_request di runner sendiri wajib punya guard fork (if: ${forkGuard})`);
-    }
+    for (const runner of runners) if (runner !== "ubuntu-latest") problems.push(`runs-on "${runner}" harus ubuntu-latest`);
     if (!/^permissions:/m.test(text)) problems.push("blok permissions tingkat atas wajib ada");
     for (const m of text.matchAll(/^\s*-?\s*uses:\s*(\S+)/gm)) {
       const ref = m[1];
