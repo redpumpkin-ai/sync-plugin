@@ -1,0 +1,27 @@
+# Changelog
+
+Changes to the Sync agent plugin. Each entry lists the Sync MCP tools the skills call
+("Requires: tool MCP ..."); a server release must keep every listed tool available.
+
+## 0.4.0 - belum dirilis
+
+Requires: tool MCP add_ticket_comment, change_ticket_status, create_document, create_milestone, create_project, create_ticket, get_document, get_profile, get_project_dates, get_ticket, get_ticket_branch_name, get_ticket_dates, link_repository, list_assignees, list_document_spaces, list_milestones, list_my_pending_reviews, list_projects, list_repositories, list_ticket_comments, publish_document, search_documents, search_tickets, update_document, update_project_dates, update_ticket, update_ticket_dates
+
+- Shared conventions for approval, language, tags and secrets live in `skills/_shared/conventions.md`; skills point to it instead of repeating the rules.
+- New skill `sync-docs`: write, find, update and publish Sync Knowledge documents (hand-off note, ADR, PRD, runbook, postmortem, meeting notes, roadmap) from a template, linked to the ticket, published after you approve.
+- New skill `sync-plan-from-doc`: read a PRD or project document and propose one approval table of project, milestones, tickets, assignees, repo and PRD document; nothing is created before you approve.
+- New hooks (`hooks/sync-guard.mjs`): a SessionStart reminder to link the branch to a ticket and a Stop reminder, at most once per session, to document new commits. They run only in repos with the Sync block from `sync-init`; `SYNC_HOOKS=off` turns them off.
+- `sync-tickets` is slimmer: shared rules moved to the conventions file.
+- `sync-complete-ticket` offers a hand-off document after the ticket comment.
+- The `sync` router lists the new skills.
+- The plugin now lives in its own repository (`redpumpkin-ai/sync-plugin`) with CI checks, a release workflow, `compat.json` and an Apache-2.0 license.
+- Long skills moved detail into `references/` without behavior change, and every skill now declares an `argument-hint`.
+
+## 0.3.0
+
+Requires: tool MCP add_ticket_comment, change_ticket_status, create_milestone, create_ticket, get_profile, get_project_dates, get_ticket, get_ticket_branch_name, get_ticket_dates, list_assignees, list_milestones, list_my_pending_reviews, list_projects, list_ticket_comments, search_tickets, update_project_dates, update_ticket, update_ticket_dates
+
+- The Sync MCP connection uses `https://sync.redpumpkin.ai/mcp` instead of the previous origin URL. Existing installs keep the old URL until the plugin is updated or the MCP server is added again.
+- New skills: `sync-projects` (bring a project's ticket dates, descriptions and comments in line with a schedule, after a confirmed diff), `sync-timeline` and `sync-ticket-audit`.
+- New `[UPDATE]` ticket comment template in `sync-tickets`.
+- Tickets carry a type and branch names are limited to 30 characters.

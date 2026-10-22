@@ -1,0 +1,13 @@
+{
+  "name": "redpumpkin",
+  "description": "RedPumpkin agent plugins",
+  "owner": { "name": "RedPumpkin" },
+  "plugins": [
+    {
+      "name": "sync",
+      "source": "./",
+      "description": "Sync by RedPumpkin MCP connection plus skills: repo setup, start ticket, complete ticket.",
+      "version": "0.3.0"
+    }
+  ]
+}

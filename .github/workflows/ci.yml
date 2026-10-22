@@ -1,0 +1,34 @@
+# Pemeriksaan untuk setiap PR dan push ke main. Hanya membaca repo: tanpa secret,
+# tanpa tulis, dan tanpa pemicu yang menjalankan kode PR dengan hak lebih tinggi.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        # 18 = versi minimum yang diklaim README untuk hook; 22 = LTS terbaru.
+        node-version: [18, 22]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Pemeriksaan repo
+        run: node scripts/check.mjs
+      - name: Test hook
+        run: node --test hooks/sync-guard.test.mjs
+      - name: Test pemeriksaan
+        run: node --test scripts/check.test.mjs

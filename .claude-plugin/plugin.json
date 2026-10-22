@@ -1,0 +1,9 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "sync",
+  "version": "0.3.0",
+  "description": "Sync by RedPumpkin MCP connection plus skills: repo setup, ticket planning and progress, start and complete ticket, digest.",
+  "author": { "name": "RedPumpkin" },
+  "repository": "https://github.com/redpumpkin-ai/sync-plugin",
+  "license": "Apache-2.0"
+}

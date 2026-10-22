@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "sync": {
+      "type": "http",
+      "url": "https://sync.redpumpkin.ai/mcp",
+      "headers": {
+        "X-Sync-Plugin": "codex/0.3.0"
+      },
+      "oauth": {
+        "clientId": "sync-mcp-cli",
+        "callbackUrl": "http://127.0.0.1:33418/callback",
+        "callbackPort": 33418
+      }
+    }
+  }
+}

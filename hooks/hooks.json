@@ -1,0 +1,27 @@
+{
+  "description": "Sync: pengingat ticket saat sesi mulai dan dokumentasi sebelum berhenti. Matikan dengan SYNC_HOOKS=off.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/sync-guard.mjs\" session-start",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/sync-guard.mjs\" stop",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}

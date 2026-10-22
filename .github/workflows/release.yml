@@ -1,0 +1,36 @@
+# Rilis dibuat dari tag v*. Tag hanya boleh dibuat pemilik repo (lihat README, bagian Tags).
+# Satu-satunya hasil publikasi adalah GitHub Release; tidak ada yang dipublikasikan ke tempat lain.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      # Hanya job ini yang boleh menulis, dan hanya untuk membuat Release.
+      contents: write
+    env:
+      # Nilai tag lewat env, tidak pernah disisipkan ke badan skrip (cegah injeksi shell).
+      TAG: ${{ github.ref_name }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      - name: Pemeriksaan repo
+        run: node scripts/check.mjs
+      - name: Pemeriksaan rilis (tag sama dengan versi manifest, CHANGELOG final)
+        run: node scripts/check.mjs --release "$TAG" --notes-out "$RUNNER_TEMP/notes.md"
+      - name: Buat GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$TAG" --title "$TAG" --notes-file "$RUNNER_TEMP/notes.md" --verify-tag

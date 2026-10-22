@@ -1,0 +1,3 @@
+# Codex: same rule as disable-model-invocation in SKILL.md. The user starts this skill with $sync-complete-ticket.
+policy:
+  allow_implicit_invocation: false
