@@ -188,6 +188,15 @@ Rollback: revert the version bump in the Sync app repository, redeploy the previ
   - the MCP tools the skills call are listed in `compat.json` and in the top CHANGELOG entry.
 - Never commit application code, secrets or customer data. The check fails on internal names, secret shapes and URLs outside a short allowlist.
 
+## CI runners
+
+Workflows run on RedPumpkin's own runner group (`[self-hosted, redpumpkin-platform]`), not on GitHub-hosted runners. Because this repository is public, two rules keep outside code off that runner:
+
+- `ci.yml` only runs for pushes and for pull requests from branches in this repository. Pull requests from forks never reach the runner; a maintainer reviews them and, if they are good, pushes the branch here.
+- Workflows must never use the `pull_request_target` trigger. `scripts/check.mjs` fails if they do, if the runner is anything else, or if the fork guard is removed.
+
+The runner group must be limited to this repository, and the repository setting "Require approval for all outside collaborators" must stay on.
+
 ## Tags
 
 Only `@MKMaarif` creates `v*` tags. A tag must equal the manifest version and have a finished CHANGELOG entry. Tags are never moved or deleted: to fix a release, publish a new version.

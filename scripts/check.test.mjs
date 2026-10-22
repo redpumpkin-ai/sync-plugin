@@ -193,9 +193,16 @@ describe("check.mjs: workflow", () => {
     expectRed(r, "workflow", "dilarang");
   });
 
-  it("merah bila ada runner self-hosted", () => {
-    const r = mutate((d) => edit(d, ".github/workflows/ci.yml", (t) => t.replace("runs-on: ubuntu-latest", `runs-on: ${BAD_RUNNER}`)));
-    expectRed(r, "workflow", "dilarang");
+  it("merah bila runner bukan grup redpumpkin-platform", () => {
+    const r = mutate((d) => edit(d, ".github/workflows/ci.yml", (t) => t.replace("runs-on: [self-hosted, redpumpkin-platform]", "runs-on: ubuntu-latest")));
+    expectRed(r, "workflow", "harus [self-hosted, redpumpkin-platform]");
+    const r2 = mutate((d) => edit(d, ".github/workflows/release.yml", (t) => t.replace("runs-on: [self-hosted, redpumpkin-platform]", `runs-on: ${BAD_RUNNER}`)));
+    expectRed(r2, "workflow", "harus [self-hosted, redpumpkin-platform]");
+  });
+
+  it("merah bila guard fork hilang dari workflow pull_request", () => {
+    const r = mutate((d) => edit(d, ".github/workflows/ci.yml", (t) => t.replace(/^\s*if: github\.event_name.*\n/m, "")));
+    expectRed(r, "workflow", "guard fork");
   });
 
   it("merah bila action tidak dipin ke SHA penuh", () => {

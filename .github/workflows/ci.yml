@@ -12,7 +12,11 @@ permissions:
 
 jobs:
   check:
-    runs-on: ubuntu-latest
+    # Runner milik RedPumpkin (billing GitHub-hosted habis). Repo ini publik: tanpa guard di
+    # bawah, PR dari fork akan menjalankan kode orang asing di jaringan kita. Guard memastikan
+    # job hanya jalan untuk push, atau PR dari branch di repo ini (butuh hak tulis).
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: [self-hosted, redpumpkin-platform]
     timeout-minutes: 10
     strategy:
       fail-fast: false
