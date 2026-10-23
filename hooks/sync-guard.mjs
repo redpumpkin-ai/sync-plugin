@@ -1,16 +1,22 @@
 /**
  * sync-guard: hook plugin Sync (Claude Code dan Codex) yang mengingatkan agen untuk
- * menghubungkan pekerjaan ke ticket Sync saat sesi dimulai (SessionStart), dan meminta
- * agen mendokumentasikan commit sebelum berhenti (Stop).
+ * menghubungkan pekerjaan ke ticket Sync saat sesi dimulai (SessionStart), meminta
+ * agen mendokumentasikan commit sebelum berhenti (Stop), dan menawarkan ticket berikutnya
+ * setelah sebuah ticket dipindah ke IN_REVIEW atau DONE (PostToolUse).
  *
  * Kenapa ada: tim sering lupa membuat ticket dan mendokumentasikan pekerjaan, sehingga
- * serah terima menjadi sulit. Hook ini lokal dan deterministik: tidak pernah memanggil
- * MCP, hanya menambah konteks atau meminta agen menjalankan `/sync-tickets` atau `/sync-docs`.
+ * serah terima menjadi sulit; dan pengembang yang bekerja lewat agen berhenti begitu satu
+ * ticket selesai. Hook ini lokal dan deterministik: tidak pernah memanggil MCP, hanya
+ * menambah konteks atau meminta agen menjalankan `/sync-tickets` atau `/sync-docs`.
  *
  * Aturan keselamatan: setiap jalur gagal keluar dengan kode 0 dan tanpa output, supaya
  * hook tidak pernah merusak sesi (kode keluar selain 0 muncul sebagai galat di setiap
- * sesi, kode 2 memblokir). Hook hanya aktif di repo git yang `AGENTS.md`-nya punya blok
- * Sync dari `sync-init`; di tempat lain diam. `SYNC_HOOKS=off` mematikan keduanya.
+ * sesi, kode 2 memblokir). SessionStart dan Stop hanya aktif di repo git yang
+ * `AGENTS.md`-nya punya blok Sync dari `sync-init`; di tempat lain diam. PostToolUse
+ * sengaja tanpa syarat repo: pemicunya panggilan tool status Sync yang eksplisit, itu
+ * sendiri sudah bukti Sync dipakai, dan syarat repo akan membisukannya di folder
+ * workspace berisi banyak repo yang didukung `sync-init` (PLAN-SyncPlugin-v0.4 Phase 5b).
+ * `SYNC_HOOKS=off` mematikan ketiganya.
  *
  * Skrip ini Node murni tanpa dependensi (hanya modul `node:`), jalan di Node 18+.
  * `TICKET_REF_PATTERN` harus tetap sama dengan pola ticket-ref yang dipakai aplikasi
@@ -151,6 +157,57 @@ export function decideStop({ stopHookActive, state, newCommitCount, documented }
   return { block: true, reason: STOP_REASON };
 }
 
+const CHANGE_STATUS_TOOL = "change_ticket_status";
+
+/** Hanya dua status ini yang memicu tawaran ticket berikutnya (himpunan tertutup). */
+const NEXT_TICKET_STATUSES = new Set(["IN_REVIEW", "DONE"]);
+
+/**
+ * True bila nama tool adalah tool status Sync. Matcher di hooks.json sengaja longgar
+ * (`change_ticket_status$`) karena hanya nama Claude Code yang terverifikasi; di sini
+ * nama dicek ulang dengan batas, agar `not_change_ticket_status` tidak dihitung
+ * (PLAN-SyncPlugin-v0.4 Phase 5b).
+ */
+export function isChangeStatusTool(name) {
+  if (typeof name !== "string" || !name.endsWith(CHANGE_STATUS_TOOL)) return false;
+  const before = name.slice(0, name.length - CHANGE_STATUS_TOOL.length);
+  return before === "" || /(?:__|[.:/])$/.test(before);
+}
+
+/**
+ * Teks tetap yang disuntikkan setelah ticket pindah ke `status`. `status` selalu berasal
+ * dari himpunan tertutup IN_REVIEW/DONE; tidak ada isi `tool_input` (judul ticket bisa
+ * teks bebas, vektor injeksi) yang ikut disalin. Aturan yang sama ditulis dalam bahasa
+ * Inggris di `skills/_shared/conventions.md` ("Next-ticket suggestion"); test mengunci
+ * teks ini.
+ */
+export function nextTicketContext(status) {
+  return (
+    "Sync: ticket baru dipindah ke " +
+    status +
+    ". Tawarkan ticket berikutnya: panggil `get_my_work_summary`, pilih 1-3 ticket selain yang baru dipindah " +
+    "(prioritas tertinggi dulu, utamakan milestone yang sama dengan ticket tadi, lewati ticket yang punya " +
+    "[QUESTION] belum terjawab di `list_ticket_comments`), tampilkan key, judul, prioritas dan milestone, " +
+    "lalu tunggu user memilih. Jangan mulai mengerjakan ticket apa pun sebelum user memilih."
+  );
+}
+
+/**
+ * Keputusan PostToolUse. Status baru dibaca dari `tool_input.status` saja: bentuk
+ * `tool_response` untuk tool MCP tidak terdokumentasi di kedua CLI, jadi hanya
+ * `isError === true` yang diperiksa (panggilan gagal tidak memindahkan apa pun).
+ * Bentuk lain tidak pernah mengubah keputusan dan tidak pernah melempar.
+ */
+export function decideNextTicket({ toolName, toolInput, toolResponse } = {}) {
+  if (!isChangeStatusTool(toolName)) return { suggest: false };
+  if (toolResponse?.isError === true) return { suggest: false };
+  const raw = toolInput?.status;
+  if (typeof raw !== "string") return { suggest: false };
+  const status = raw.trim().toUpperCase();
+  if (!NEXT_TICKET_STATUSES.has(status)) return { suggest: false };
+  return { suggest: true, context: nextTicketContext(status) };
+}
+
 // ---------------------------------------------------------------------------
 // I/O (tidak diekspor)
 // ---------------------------------------------------------------------------
@@ -287,6 +344,24 @@ async function handleStop(input) {
   process.stdout.write(JSON.stringify({ decision: "block", reason: decision.reason }));
 }
 
+/** Tanpa git, state file, atau syarat repo: lihat JSDoc di kepala file. */
+function handlePostToolUse(input) {
+  if (isHooksOff(process.env)) return;
+
+  const decision = decideNextTicket({
+    toolName: input.tool_name,
+    toolInput: input.tool_input,
+    toolResponse: input.tool_response,
+  });
+  if (!decision.suggest) return;
+
+  process.stdout.write(
+    JSON.stringify({
+      hookSpecificOutput: { hookEventName: "PostToolUse", additionalContext: decision.context },
+    }),
+  );
+}
+
 async function main() {
   try {
     const mode = process.argv[2];
@@ -300,6 +375,7 @@ async function main() {
 
     if (mode === "session-start") handleSessionStart(input);
     else if (mode === "stop") await handleStop(input);
+    else if (mode === "post-tool-use") handlePostToolUse(input);
   } catch {
     // jangan pernah merusak sesi
   } finally {
@@ -308,6 +384,10 @@ async function main() {
 }
 
 // Jangan bandingkan import.meta.url dengan argv[1]: huruf drive Windows berbeda kapitalisasi.
-if (process.argv[2] === "session-start" || process.argv[2] === "stop") {
+if (
+  process.argv[2] === "session-start" ||
+  process.argv[2] === "stop" ||
+  process.argv[2] === "post-tool-use"
+) {
   await main();
 }

@@ -1,5 +1,5 @@
 {
-  "description": "Sync: pengingat ticket saat sesi mulai dan dokumentasi sebelum berhenti. Matikan dengan SYNC_HOOKS=off.",
+  "description": "Sync: pengingat ticket saat sesi mulai, dokumentasi sebelum berhenti, dan tawaran ticket berikutnya setelah IN_REVIEW atau DONE. Matikan dengan SYNC_HOOKS=off.",
   "hooks": {
     "SessionStart": [
       {
@@ -18,6 +18,18 @@
           {
             "type": "command",
             "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/sync-guard.mjs\" stop",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "change_ticket_status$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/sync-guard.mjs\" post-tool-use",
             "timeout": 15
           }
         ]
