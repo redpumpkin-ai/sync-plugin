@@ -14,6 +14,9 @@ Requires: tool MCP add_ticket_comment, change_ticket_status, create_document, cr
 - New hook: after `change_ticket_status` moves a ticket to IN_REVIEW or DONE, the agent proposes up to three next tickets and waits for your pick; `SYNC_HOOKS=off` turns it off.
 - `sync-tickets` is slimmer: shared rules moved to the conventions file.
 - `sync-complete-ticket` offers a hand-off document after the ticket comment, then the same next-ticket suggestion (a status moved by GitHub skips the hook).
+- New skill `sync-run-ticket`: carries tickets to a draft PR without supervision (`--queue` for your TODO tickets). At a grey area it posts a numbered `[QUESTION]` and skips the ticket; `--yolo` decides and logs a `[DECISION]` for each choice. Never merges or force-pushes; stops a ticket after two failed verifications. Claude Code and Codex locally are supported, a cloud routine is not yet verified, Codex cloud is not supported.
+- Shared conventions: the "Unattended run" exception to approval (only `sync-run-ticket`), one rule for an unanswered `[QUESTION]`, and numbered questions.
+- `sync-digest` lists tickets with an unanswered `[QUESTION]` under "Needs you now", since ticket comments notify nobody.
 - The `sync` router lists the new skills.
 - The plugin now lives in its own repository (`redpumpkin-ai/sync-plugin`) with CI checks, a release workflow, `compat.json` and an Apache-2.0 license.
 - Long skills moved detail into `references/` without behavior change, and every skill now declares an `argument-hint`.

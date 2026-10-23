@@ -15,3 +15,5 @@ For a cloud routine, confirm the connector exists before going further. If it do
 2. Set the URL to `https://sync.redpumpkin.ai/mcp`.
 3. Set the OAuth Client ID to `sync-mcp-inspector-claude` and leave the secret empty.
 4. Sign in with Keycloak.
+
+To schedule sync-run-ticket --queue instead of the digest, see the README section "Scheduling sync-run-ticket --queue"; this skill does not build that prompt.

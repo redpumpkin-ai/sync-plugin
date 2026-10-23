@@ -9,6 +9,7 @@ Skills that make coding agents (Claude Code, Codex) follow the team's Sync by Re
 | `sync-init` | Write the team's Sync rules into a repo's `AGENTS.md` and connect `CLAUDE.md` to it. Run once per repo, or again when the rules change. |
 | `sync-start-ticket <KEY>` | Check out the ticket branch and push it. The push moves the ticket to IN_PROGRESS. |
 | `sync-complete-ticket [KEY]` | Verify, commit, push and open a PR (which moves the ticket to IN_REVIEW), then comment on the ticket and offer the next ticket. You have to invoke it yourself. |
+| `sync-run-ticket <KEY ...\|--queue> [--yolo]` | Carry tickets to a draft PR with nobody watching, e.g. overnight. It asks about grey areas in `[QUESTION]` comments and skips the ticket (`--yolo` lets the agent decide and log `[DECISION]`). Never merges or force-pushes. You have to invoke it yourself. |
 | `sync-docs <handoff\|adr\|prd\|runbook\|postmortem\|meeting\|roadmap\|blank\|search\|update\|publish> [title-or-query] [--ticket KEY] [--project NAME]` | Write project docs in Sync Knowledge from a template, link them to the ticket, and publish after you approve. |
 | `sync-plan-from-doc <path-or-doc-id> [--project NAME]` | Read a PRD or project doc, propose the project, milestones, tickets, assignees and repo, and create them after you approve. |
 | `sync-digest` | Show what's on your plate: open tickets, overdue or due-soon tickets, incident reviews waiting on you, and PRs waiting for your review. Read-only. |
@@ -158,6 +159,32 @@ The Codex side is untested on a real install, in particular on Windows, where th
 - Documentation done by a subagent is not seen; only the main transcript is read.
 - The Stop hook blocks at most once per session, and never when it cannot read the transcript.
 - Status changes made by GitHub events or by the Sync web app never reach the PostToolUse hook.
+
+## Scheduling sync-run-ticket --queue
+
+`sync-run-ticket` runs while you are away. There is no separate scheduler skill: you start it yourself in a session you leave running, or you schedule its prompt the way `sync-schedule-digest` schedules the digest.
+
+| Runner | Status |
+|---|---|
+| Claude Code local, plugin installed | Supported: `/sync:sync-run-ticket --queue` |
+| Codex local, plugin installed | Supported: `$sync-run-ticket --queue` |
+| Claude Code routine (cloud) | belum diverifikasi — needs one live routine run. Plugins are not loaded there, so the prompt must stand alone (see below). |
+| Codex cloud tasks | Not supported: nothing found on remote MCP with OAuth in cloud tasks, and this skill reads and writes tickets only through MCP. |
+| Desktop local task / Codex scheduled task | Same mechanism as in `skills/sync-schedule-digest/references/platforms.md`, not verified with this skill. |
+
+### Before you leave
+
+- Pre-approve in your own permission settings what the run needs, because the skill grants none of it: `git push`, `gh pr create`, the Sync write tools and the repo's verify command. A prompt nobody answers stalls the night. Pre-approving `git push` is your decision; the skill never force-pushes.
+- Sync does not notify anyone about comments. A `[QUESTION]` the run asked is visible in `sync-digest` under "Needs you now" or on the ticket. Answer with a plain comment and run again.
+
+### Cloud routine (unverified)
+
+The prompt must stand alone, like `skills/sync-schedule-digest/references/prompt.md`. Build it as this header followed by verbatim copies (copy, do not paraphrase) of the body of `skills/sync-run-ticket/SKILL.md`, `skills/sync-run-ticket/references/run.md`, the "Unattended run" and "Comment tags" parts of `skills/_shared/conventions.md`, and the steps files of `sync-start-ticket` and `sync-complete-ticket` plus `sync-docs/references/templates.md`.
+
+Header: `Unattended scheduled run of sync-run-ticket --queue. Nobody is watching: never ask in chat, post questions as [QUESTION] ticket comments and skip the ticket, open draft PRs only, never merge.`
+
+Use the claude.ai Sync connector (connector steps: `skills/sync-schedule-digest/references/platforms.md`) and pick the repo the tickets live in. Also unverified: that the connector is present in the run and its sign-in holds between runs, and that a routine may push a ticket branch.
+
 ## Permission prompts (Claude Code)
 
 - Local git commands run without prompts.
