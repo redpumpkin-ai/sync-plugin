@@ -1,6 +1,6 @@
 {
   "name": "sync",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Sync by RedPumpkin MCP connection plus skills: repo setup, ticket planning and progress, start and complete ticket, digest.",
   "author": {
     "name": "RedPumpkin"

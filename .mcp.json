@@ -4,7 +4,7 @@
       "type": "http",
       "url": "https://sync.redpumpkin.ai/mcp",
       "headers": {
-        "X-Sync-Plugin": "claude-code/0.3.0"
+        "X-Sync-Plugin": "claude-code/0.4.0"
       },
       "oauth": {
         "clientId": "sync-mcp-cli",
