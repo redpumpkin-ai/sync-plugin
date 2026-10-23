@@ -101,6 +101,8 @@ GitHub moves the ticket at every step, through the Sync GitHub App. Agents never
    4. drafts the structured `[DONE]` ticket comment and posts it once you say yes.
 4. **Review**: the reviewer approves and merges on GitHub.
 
+The Sync app's Guide page (`https://sync.redpumpkin.ai/guide#daily-flow`) walks through this flow, the comment tags, handover and the skills, and shows the same commit and PR rule as `skills/_shared/conventions.md`.
+
 ## Hooks (reminders)
 
 The plugin ships three hooks, all run by one small script (`hooks/sync-guard.mjs`):

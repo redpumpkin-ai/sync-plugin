@@ -1,6 +1,6 @@
 # Commit-message rules per tool
 
-Paths are relative to the skills folder. The rule text is kept only in `../_shared/conventions.md`, section "Commit and PR format" (`_shared/conventions.md` in a ZIP upload). Paste that block; do not retype it here.
+Paths are relative to the skills folder. The rule text is kept only in `../_shared/conventions.md`, section "Commit and PR format" (`_shared/conventions.md` in a ZIP upload). Paste that block; do not retype it here. The same section holds the pull-request rule (title and description); PR titles and descriptions follow that file too.
 
 ## Where the rule goes, per tool
 

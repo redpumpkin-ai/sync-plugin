@@ -12,6 +12,8 @@ sync-start-ticket    branch pushed -> IN_PROGRESS (also takes over an in-progres
 sync-complete-ticket verify, commit, PR -> IN_REVIEW, structured [DONE]
 ```
 
+The full walkthrough (daily flow, comment tags, handover, skills) is the Sync app's Guide page, section "Alur harian dengan Sync": `https://sync.redpumpkin.ai/guide#daily-flow`.
+
 Commit recording needs the Sync server release with commit recording (Phase 6b); its deployment is belum diverifikasi. Until then the skills read the commits from `git log`.
 
 Alongside: `sync-docs` (documents), `sync-run-ticket` (unattended, never merges), `sync-digest` (what is on my plate).

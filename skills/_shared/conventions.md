@@ -16,7 +16,7 @@ Shared rules for every Sync skill: comment tags, templates, approval, the wiki a
 
 ## Commit and PR format
 
-This is the only place the plugin keeps the rule; the AGENTS.md block that `sync-init` writes carries a short form for repos. The Sync app shows the same rule in Settings -> MCP, so keep the two identical. Paste this block into any AI commit-message generator:
+This is the only place the plugin keeps the rule; the AGENTS.md block that `sync-init` writes carries a short form for repos. The Sync app shows the same rule in Settings -> MCP and on its Guide page; its source is the constants `COMMIT_MESSAGE_RULE` and `PR_RULE` in `lib/commit-message-convention.ts` of the app repo. Keep all copies identical. Paste the commit block into any AI commit-message generator:
 
 ```text
 Write every commit message in English.
@@ -35,7 +35,24 @@ Refs: SYN-12
 Omit the footer only when the branch name has no ticket key.
 ```
 
-- The PR title has the same `type(scope): subject` form without the key. The PR description ends with the line `Refs: <KEY>`.
+Paste this block into any AI pull-request writer:
+
+```text
+Write every pull request title and description in English.
+
+Title: type(scope): subject
+- Use the same form as a commit subject: type is one of the commit types, scope is the code area that changed, subject is imperative.
+- type is one of: feat, fix, refactor, docs, test, perf, build, ci, chore, revert.
+- The whole title is at most 72 characters.
+- Never put the ticket key in the title.
+
+Description: summarise what changed and why. End it with a blank line and the ticket key taken from the current branch name, for example:
+Refs: SYN-12
+Omit the footer only when the branch name has no ticket key.
+
+Open the pull request from the ticket branch: the server links the PR to the ticket by the branch name.
+```
+
 - Type: when the ticket has a `type` that is in the list above, use it lowercased, so the branch prefix, the commits and the PR title share one type. When the ticket has no type, or its type is not in the list (ticket types include STYLE, which the list lacks), pick the closest listed type yourself.
 - The Sync server reads the ticket key from the branch name. The footer is for people and `git log`.
 

@@ -26,6 +26,7 @@ Requires: tool MCP add_ticket_comment, change_ticket_status, create_document, cr
 - `sync-run-ticket` closes a shipped ticket with `[DONE]` and a stopped one with `[HANDOFF]`; the hand-off document is optional.
 - `sync-ticket-audit` reports IN_REVIEW or DONE tickets that have no `[DONE]` comment.
 - New skill `sync-setup`: commit-message rules per tool with an optional commit-msg hook, the skill flow, extra tools and companion skills.
+- The commit and PR rule is now one text shared with the Sync app (Settings -> MCP and the Guide page), and the Guide explains the daily flow, comment tags, handover and skills.
 - The skills assume the Sync server records commits on the ticket (Phase 6b) and fall back to `git log` when it does not.
 
 ## 0.3.0
