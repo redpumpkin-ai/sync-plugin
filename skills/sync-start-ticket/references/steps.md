@@ -1,6 +1,6 @@
 # sync-start-ticket steps
 
-Read this before step 1: the full text of all 8 steps, including the status table.
+Read this before step 1: the full text of all 8 steps, including the status table. For an IN_PROGRESS ticket whose branch already has commits, read `handover.md` too.
 
 1. **Read the ticket**: `get_ticket` with the key, ID or title the user gave. If the title matches several tickets, ask which one.
 
@@ -9,7 +9,7 @@ Read this before step 1: the full text of all 8 steps, including the status tabl
    | Status | Action |
    |---|---|
    | BACKLOG, TODO | Continue. |
-   | IN_PROGRESS | Continue, but reuse the existing branch if one exists (step 5). |
+   | IN_PROGRESS | If the branch already has commits, follow `handover.md` instead of steps 5-7. Otherwise reuse the branch (step 5). |
    | IN_REVIEW, APPROVED | A PR is open. Continue only to address review; reuse its branch. Tell the user. |
    | DONE, CANCELED | Stop. Tell the user, and offer a follow-up ticket instead of reopening. |
 
