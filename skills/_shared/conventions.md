@@ -33,6 +33,8 @@ Start every comment with its tag.
 
 `[DONE]` means the agent's work is done. The ticket status still comes from the PR (IN_REVIEW until it is merged).
 
+A `[QUESTION]` is **unanswered** until a later comment on the ticket does not start with a tag from the table above. Everything an agent posts starts with a tag, so a later untagged comment is a person's reply. `sync-digest`, `sync-run-ticket --queue` and the next-ticket suggestion share this one rule.
+
 ## Templates
 
 Keep each comment readable in under a minute. Omit any line with nothing real to say.
@@ -136,6 +138,8 @@ Options: <the choices; say which one you recommend, if any>
 Blocking: <what cannot proceed until it is answered>
 ```
 
+With several questions, number them (`Question 1:`, `Question 2:`), each with its own `Options:` line, so one reply can answer "Q1 b, Q2 a".
+
 ### [DECISION]
 
 ```
@@ -154,12 +158,23 @@ Manual test steps are opt-in. Add a `Test (manual):` section only when the user 
 
 ## Approval
 
-Show the plan or the exact content, wait for the user's agreement, then write. The single exception is `--yolo` (defined in Phase 6).
+Show the plan or the exact content, wait for the user's agreement, then write. The single exception is an unattended run (below).
 
 - `create_ticket` and `update_ticket`: the client prompt guards the write. Show the draft in your message, then make the call, without a separate "shall I proceed?" round.
-- Comments cannot be edited or deleted, so show every draft first. Post `[BLOCKED]`, `[HANDOFF]`, `[DONE]`, `[QUESTION]` and `[DECISION]` only after the user agrees. Post `[START]`, `[PLAN]`, `[PHASE k/N DONE]`, `[UPDATE]` and `[DOC]` right after showing them.
-- Documents (create, update, publish) always wait for the user's agreement on the content.
+- Comments cannot be edited or deleted, so show every draft first. Post `[BLOCKED]`, `[HANDOFF]`, `[DONE]`, `[QUESTION]` and `[DECISION]` only after the user agrees (an unattended run excepted). Post `[START]`, `[PLAN]`, `[PHASE k/N DONE]`, `[UPDATE]` and `[DOC]` right after showing them.
+- Documents (create, update, publish) always wait for the user's agreement on the content (the hand-off document of an unattended run excepted).
 - Ask before writing only when something is ambiguous: a title matches several tickets, or the project or milestone is unclear.
+
+### Unattended run (`sync-run-ticket` only)
+
+The user starts `sync-run-ticket` and leaves, so nobody can agree to a draft. Inside that skill, and nowhere else, the run writes without waiting:
+
+- `[QUESTION]`, `[DECISION]` and `[BLOCKED]` comments;
+- the run's hand-off document (create, publish) and its `[DOC]` comment.
+
+`--yolo` only decides what happens at a grey area. Without it the run posts a `[QUESTION]` and skips the ticket. With it the agent chooses and posts a `[DECISION]` for each choice.
+
+Not lifted by `--yolo` or by the user saying "don't ask me": merging or auto-merging, force-pushing, marking a PR ready (draft only), touching a ticket assigned to someone else, calling `change_ticket_status`, and putting secrets in a comment or document. Every other skill keeps the approval rules above.
 
 ## Wiki
 
@@ -174,7 +189,7 @@ Show the plan or the exact content, wait for the user's agreement, then write. T
 When a ticket reaches IN_REVIEW or DONE, offer what to work on next. Offer only: start nothing until the user picks.
 
 1. Call `get_my_work_summary`.
-2. Sort `nextTickets` without the ticket that was just moved: highest priority first (URGENT, HIGH, NORMAL, LOW), the same milestone as that ticket breaking ties. Walk down the sorted list and call `list_ticket_comments` for each ticket; skip any whose thread has a `[QUESTION]` with no later reply, and keep walking until you have 3 that qualify or the list ends.
+2. Sort `nextTickets` without the ticket that was just moved: highest priority first (URGENT, HIGH, NORMAL, LOW), the same milestone as that ticket breaking ties. Walk down the sorted list and call `list_ticket_comments` for each ticket; skip any whose thread has an unanswered `[QUESTION]`, and keep walking until you have 3 that qualify or the list ends.
 3. Show key, title, priority and milestone for each, then wait for the user's pick. If nothing qualifies, say so plainly.
 
 Two things trigger this: the `sync-guard` PostToolUse hook after `change_ticket_status` moves a ticket to IN_REVIEW or DONE (its Indonesian message in `hooks/sync-guard.mjs` must say the same thing), and the end of `sync-complete-ticket`, because a status that moves through GitHub never reaches that hook. Do not offer twice for the same ticket in one session.
