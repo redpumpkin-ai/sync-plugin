@@ -20,6 +20,13 @@ Requires: tool MCP add_ticket_comment, change_ticket_status, create_document, cr
 - The `sync` router lists the new skills.
 - The plugin now lives in its own repository (`redpumpkin-ai/sync-plugin`) with CI checks, a release workflow, `compat.json` and an Apache-2.0 license.
 - Long skills moved detail into `references/` without behavior change, and every skill now declares an `argument-hint`.
+- `sync-complete-ticket` posts a structured `[DONE]` comment (Summary, Decisions, What changed, Verification, Not finished, How to continue, References, Written by) built from the ticket's commits and earlier decision comments.
+- One commit and PR format in the shared conventions: `type(scope): subject`, the ticket key in a `Refs:` footer, the PR title without the key. The `sync-init` block carries the same rule.
+- `sync-start-ticket` takes over an in-progress ticket whose branch already has commits, without a new branch or push.
+- `sync-run-ticket` closes a shipped ticket with `[DONE]` and a stopped one with `[HANDOFF]`; the hand-off document is optional.
+- `sync-ticket-audit` reports IN_REVIEW or DONE tickets that have no `[DONE]` comment.
+- New skill `sync-setup`: commit-message rules per tool with an optional commit-msg hook, the skill flow, extra tools and companion skills.
+- The skills assume the Sync server records commits on the ticket (Phase 6b) and fall back to `git log` when it does not.
 
 ## 0.3.0
 

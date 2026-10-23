@@ -7,8 +7,8 @@ Skills that make coding agents (Claude Code, Codex) follow the team's Sync by Re
 | `sync` | List the Sync skills and which command to use. Does no work itself. |
 | `sync-tickets` | Plan and create a ticket (with a duplicate check), log progress, phases, blockers and hand-offs as ticket comments, and groom tickets. Status is left to GitHub. |
 | `sync-init` | Write the team's Sync rules into a repo's `AGENTS.md` and connect `CLAUDE.md` to it. Run once per repo, or again when the rules change. |
-| `sync-start-ticket <KEY>` | Check out the ticket branch and push it. The push moves the ticket to IN_PROGRESS. |
-| `sync-complete-ticket [KEY]` | Verify, commit, push and open a PR (which moves the ticket to IN_REVIEW), then comment on the ticket and offer the next ticket. You have to invoke it yourself. |
+| `sync-start-ticket <KEY>` | Check out the ticket branch and push it. The push moves the ticket to IN_PROGRESS. It also takes over an in-progress ticket without a new branch. |
+| `sync-complete-ticket [KEY]` | Verify, commit, push and open a PR (which moves the ticket to IN_REVIEW), then post a structured `[DONE]` comment on the ticket and offer the next ticket. You have to invoke it yourself. |
 | `sync-run-ticket <KEY ...\|--queue> [--yolo]` | Carry tickets to a draft PR with nobody watching, e.g. overnight. It asks about grey areas in `[QUESTION]` comments and skips the ticket (`--yolo` lets the agent decide and log `[DECISION]`). Never merges or force-pushes. You have to invoke it yourself. |
 | `sync-docs <handoff\|adr\|prd\|runbook\|postmortem\|meeting\|roadmap\|blank\|search\|update\|publish> [title-or-query] [--ticket KEY] [--project NAME]` | Write project docs in Sync Knowledge from a template, link them to the ticket, and publish after you approve. |
 | `sync-plan-from-doc <path-or-doc-id> [--project NAME]` | Read a PRD or project doc, propose the project, milestones, tickets, assignees and repo, and create them after you approve. |
@@ -16,6 +16,7 @@ Skills that make coding agents (Claude Code, Codex) follow the team's Sync by Re
 | `sync-projects` | Compare a project's tickets with a schedule or plan, show a before/after table, and apply dates, descriptions and comments after you confirm. |
 | `sync-timeline` | Map a schedule onto ticket dates and flag conflicts with dependencies, milestones and the project dates. |
 | `sync-ticket-audit` | Review tickets for stale descriptions, missing criteria, dates or milestones, and mismatched status. Read-only. |
+| `sync-setup [commit-rules\|flow\|tools\|skills]` | Show commit-message rules per tool (with an optional commit-msg hook), the skill flow, extra tools some skills need and companion skills. Read-only. |
 | `sync-schedule-digest ["weekdays 09:00"]` | Run `sync-digest` on a schedule as a Claude cloud routine, a Claude Desktop task or a Codex scheduled task. You have to invoke it yourself. |
 
 In Claude Code, skills are prefixed with the plugin name, e.g. `/sync:sync-start-ticket SYN-29`.
@@ -92,12 +93,12 @@ sync-complete-ticket          verify → commit → PR    → ticket IN_REVIEW
 GitHub moves the ticket at every step, through the Sync GitHub App. Agents never set the status by hand, and they never merge.
 
 1. **Start**: `sync-start-ticket SYN-29`. The agent checks the ticket, switches to the branch from Sync, pushes it, and summarises what the ticket asks for.
-2. **Work**: code as usual. Ask "what's left on SYN-29?" whenever you like.
+2. **Work**: code as usual. Ask "what's left on SYN-29?" whenever you like. Every pushed commit is recorded on the ticket by the Sync server (needs the server release with commit recording).
 3. **Finish**: `sync-complete-ticket`. The ticket key is read from the branch name. The agent:
    1. runs the repo's verify command, and stops if it fails;
-   2. commits as `feat(SYN-29): ...`;
-   3. pushes and opens or updates the PR;
-   4. drafts a ticket comment and posts it once you say yes.
+   2. commits as `feat(skills): add export` with a `Refs: SYN-29` footer (the key is in the footer, not the scope);
+   3. pushes and opens or updates the PR (its title has the same form without the key);
+   4. drafts the structured `[DONE]` ticket comment and posts it once you say yes.
 4. **Review**: the reviewer approves and merges on GitHub.
 
 ## Hooks (reminders)
