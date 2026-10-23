@@ -5,14 +5,15 @@ Changes to the Sync agent plugin. Each entry lists the Sync MCP tools the skills
 
 ## 0.4.0 - belum dirilis
 
-Requires: tool MCP add_ticket_comment, change_ticket_status, create_document, create_milestone, create_project, create_ticket, get_document, get_profile, get_project_dates, get_ticket, get_ticket_branch_name, get_ticket_dates, link_repository, list_assignees, list_document_spaces, list_milestones, list_my_pending_reviews, list_projects, list_repositories, list_ticket_comments, publish_document, search_documents, search_tickets, update_document, update_project_dates, update_ticket, update_ticket_dates
+Requires: tool MCP add_ticket_comment, change_ticket_status, create_document, create_milestone, create_project, create_ticket, get_document, get_my_work_summary, get_profile, get_project_dates, get_ticket, get_ticket_branch_name, get_ticket_dates, link_repository, list_assignees, list_document_spaces, list_milestones, list_my_pending_reviews, list_projects, list_repositories, list_ticket_comments, publish_document, search_documents, search_tickets, update_document, update_project_dates, update_ticket, update_ticket_dates
 
 - Shared conventions for approval, language, tags and secrets live in `skills/_shared/conventions.md`; skills point to it instead of repeating the rules.
 - New skill `sync-docs`: write, find, update and publish Sync Knowledge documents (hand-off note, ADR, PRD, runbook, postmortem, meeting notes, roadmap) from a template, linked to the ticket, published after you approve.
 - New skill `sync-plan-from-doc`: read a PRD or project document and propose one approval table of project, milestones, tickets, assignees, repo and PRD document; nothing is created before you approve.
 - New hooks (`hooks/sync-guard.mjs`): a SessionStart reminder to link the branch to a ticket and a Stop reminder, at most once per session, to document new commits. They run only in repos with the Sync block from `sync-init`; `SYNC_HOOKS=off` turns them off.
+- New hook: after `change_ticket_status` moves a ticket to IN_REVIEW or DONE, the agent proposes up to three next tickets and waits for your pick; `SYNC_HOOKS=off` turns it off.
 - `sync-tickets` is slimmer: shared rules moved to the conventions file.
-- `sync-complete-ticket` offers a hand-off document after the ticket comment.
+- `sync-complete-ticket` offers a hand-off document after the ticket comment, then the same next-ticket suggestion (a status moved by GitHub skips the hook).
 - The `sync` router lists the new skills.
 - The plugin now lives in its own repository (`redpumpkin-ai/sync-plugin`) with CI checks, a release workflow, `compat.json` and an Apache-2.0 license.
 - Long skills moved detail into `references/` without behavior change, and every skill now declares an `argument-hint`.

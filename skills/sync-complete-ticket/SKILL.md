@@ -46,3 +46,5 @@ Read `references/steps.md` first. It holds the intro on the `AGENTS.md` conventi
 Ticket key and status after the PR, commit hash(es), PR URL (new or updated), verify result, whether the comment was posted, and anything that needs the user.
 
 End the reply by offering `/sync-docs handoff --ticket <KEY>`, so the next person finds the write-up in Knowledge, or `/sync-docs adr` instead when the work settled an architecture decision. Only offer; the user decides, and do not run it from here.
+
+Then offer the next ticket, following "Next-ticket suggestion" in `../_shared/conventions.md` (`_shared/conventions.md` in a ZIP upload). Opening the PR moves the ticket through GitHub, which the Sync hook never sees, so the offer belongs here.

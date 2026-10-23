@@ -168,3 +168,13 @@ Show the plan or the exact content, wait for the user's agreement, then write. T
 - `update_document` `ticketIds` replaces the whole link list. Pass the existing ids plus the new one.
 - Run `search_documents` before creating, to avoid duplicates.
 - Templates: blank, prd, meeting, roadmap, runbook, postmortem, handoff, adr.
+
+## Next-ticket suggestion
+
+When a ticket reaches IN_REVIEW or DONE, offer what to work on next. Offer only: start nothing until the user picks.
+
+1. Call `get_my_work_summary`.
+2. Sort `nextTickets` without the ticket that was just moved: highest priority first (URGENT, HIGH, NORMAL, LOW), the same milestone as that ticket breaking ties. Walk down the sorted list and call `list_ticket_comments` for each ticket; skip any whose thread has a `[QUESTION]` with no later reply, and keep walking until you have 3 that qualify or the list ends.
+3. Show key, title, priority and milestone for each, then wait for the user's pick. If nothing qualifies, say so plainly.
+
+Two things trigger this: the `sync-guard` PostToolUse hook after `change_ticket_status` moves a ticket to IN_REVIEW or DONE (its Indonesian message in `hooks/sync-guard.mjs` must say the same thing), and the end of `sync-complete-ticket`, because a status that moves through GitHub never reaches that hook. Do not offer twice for the same ticket in one session.
