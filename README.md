@@ -41,6 +41,37 @@ codex plugin marketplace add redpumpkin-ai/sync-plugin
 codex plugin add sync@redpumpkin
 ```
 
+### Updating
+
+```bash
+# Claude Code
+claude plugin marketplace update redpumpkin
+claude plugin update sync@redpumpkin
+
+# Codex (no `plugin update`: upgrade the marketplace, then add again)
+codex plugin marketplace upgrade redpumpkin
+codex plugin add sync@redpumpkin
+```
+
+Restart the agent (Claude Code: `/reload-plugins`) so the new skills and MCP header are used.
+
+**Installed before 0.4.0?** Your `redpumpkin` marketplace still points at the old application repository, so a plain update finds nothing. Move it once:
+
+```bash
+# Claude Code
+claude plugin marketplace remove redpumpkin
+claude plugin marketplace add https://github.com/redpumpkin-ai/sync-plugin.git
+claude plugin install sync@redpumpkin
+
+# Codex
+codex plugin remove sync@redpumpkin
+codex plugin marketplace remove redpumpkin
+codex plugin marketplace add https://github.com/redpumpkin-ai/sync-plugin.git
+codex plugin add sync@redpumpkin
+```
+
+Sign in to Sync again if the agent asks.
+
 ### Step 2: Sign in to Sync (Keycloak)
 
 - **Claude Code**: open `/mcp`, select `plugin:sync:sync` (it shows "needs authentication") and choose
@@ -116,7 +147,7 @@ Things to know:
 - SessionStart and Stop only run in a git repo whose root `AGENTS.md` has the Sync block written by `sync-init`. Everywhere else they print nothing. PostToolUse has no such condition: it fires only after the Sync status tool, which is itself proof of Sync use, and a condition would silence it in workspace folders that hold several repos.
 - They never call Sync. They only add context or ask the agent to run the skills above. The reminder texts are in Indonesian.
 - `node` (18 or newer) must be on `PATH`. Without it the client shows a hook error notice at session start; `SYNC_HOOKS=off` silences it.
-- The hooks arrive with the next plugin release. The installed 0.3.0 does not have them; `claude --plugin-dir .` loads them for testing.
+- The hooks arrive with 0.4.0. An installed 0.3.0 does not have them; `claude --plugin-dir .` loads them for testing.
 
 ### Turn the hooks off
 

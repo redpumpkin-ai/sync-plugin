@@ -3,7 +3,7 @@
 Changes to the Sync agent plugin. Each entry lists the Sync MCP tools the skills call
 ("Requires: tool MCP ..."); a server release must keep every listed tool available.
 
-## 0.4.0 - belum dirilis
+## 0.4.0 - 2026-10-23
 
 Requires: tool MCP add_ticket_comment, change_ticket_status, create_document, create_milestone, create_project, create_ticket, get_document, get_my_work_summary, get_profile, get_project_dates, get_ticket, get_ticket_branch_name, get_ticket_dates, link_repository, list_assignees, list_document_spaces, list_milestones, list_my_pending_reviews, list_projects, list_repositories, list_ticket_comments, publish_document, search_documents, search_tickets, update_document, update_project_dates, update_ticket, update_ticket_dates
 
