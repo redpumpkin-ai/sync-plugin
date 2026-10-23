@@ -27,7 +27,7 @@ Write down every point where a reasonable developer could build something differ
 
 1. Run the verify command once on the checkout as it is and note the result. Already failing: post `[BLOCKED]` (Blocked on: red baseline; your own breakage could not be told apart from it), do step 7 only if something was started, and take the next ticket.
 2. Start the ticket as `../sync-start-ticket/references/steps.md` says (branch name exactly from `get_ticket_branch_name`, pushed so the GitHub App shows IN_PROGRESS). Nobody can be asked, so a dirty tree is stashed (`git stash push -u -m "before <KEY>"`, never discarded) and a repository that differs from `origin` is a `[BLOCKED]` skip.
-3. Build only what the ticket and the recorded answers or decisions ask for. Commit on the ticket branch as `type(KEY): subject`, in English, where type is the ticket's `type` in lower case (pick a Conventional Commit type only when it has none).
+3. Build only what the ticket and the recorded answers or decisions ask for. Stage files by name (never `git add -A`, never `.env` or other secrets). Commit on the ticket branch as `type(KEY): subject`, in English, where type is the ticket's `type` in lower case (pick a Conventional Commit type only when it has none).
 
 ## 5. Verify
 
