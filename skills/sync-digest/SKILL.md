@@ -3,13 +3,12 @@ name: sync-digest
 description: Use when the user asks what is on their plate in Sync by RedPumpkin — "my digest", "what's on my plate", "anything overdue or waiting on me", "what should I work on", morning check-ins — and when a scheduled Sync digest runs. Read-only.
 # Shown on Settings → MCP → Skills in Sync; not used for triggering.
 metadata:
-  summary: "Shows what's on your plate: open, overdue and due-soon tickets, incident reviews and PRs waiting for you. Read-only."
+  summary: "Shows what's on your plate: open, overdue and due-soon tickets, incident reviews, agent questions and PRs waiting for you. Read-only."
   example: "What's on my plate today?"
   chat: "true"
 argument-hint: "[no arguments]"
 effort: low
-# Claude Code only. Only gh read commands are pre-approved. Sync MCP tools are not listed:
-# each user names their server, so the mcp__<server>__ prefix is unknowable.
+# Claude Code only. Only gh read commands are pre-approved. Sync MCP tools are unlisted: the prefix is per user.
 allowed-tools:
   - Bash(gh search prs *)
   - Bash(date *)
@@ -17,7 +16,7 @@ allowed-tools:
 
 # sync-digest
 
-Read-only; "mine" is the signed-in account. Background and the tool-prefix note: `references/background.md`.
+Read-only; "mine" is the signed-in account. Notes: `references/background.md`.
 
 ## Collect
 
@@ -25,6 +24,7 @@ Read-only; "mine" is the signed-in account. Background and the tool-prefix note:
 2. `search_tickets` with `assignee` = that **email** and `status` = BACKLOG, TODO, IN_PROGRESS, IN_REVIEW, APPROVED, `limit` 50. Filter by email, not name: the filter matches substrings, so a name can pull in other people's tickets. Every count in the digest comes from this one result.
 3. `list_my_pending_reviews`: incident investigations and remediation proposals waiting on the user. If the tool is missing, the Sync server is older than this skill; write "not available on this Sync server" in that section.
 4. `gh search prs --review-requested=@me --state=open --json url,title,repository,createdAt`: PRs waiting for the user's review. If `gh` is missing or not signed in, write "GitHub not checked" in that section.
+5. Agent questions: for up to 10 BACKLOG/TODO tickets from step 2 (priority order) call `list_ticket_comments`. A ticket whose last `[QUESTION]` is unanswered is waiting on you (rule: `references/background.md`).
 
 Compute due-date buckets from `dueDate` against today: **overdue** (before today), **due soon** (today through +2 days). Ages ("for 7 days") are computed from timestamps against today.
 
@@ -36,7 +36,7 @@ Use exactly this shape. Omit a section only when the template says so. Keep each
 **Sync digest · <weekday, date>** — <N> open tickets: <x> in progress, <y> in review, <z> backlog/todo
 
 **Needs you now**
-- <overdue tickets>, <due-soon tickets>, <pending incident reviews / remediation approvals>, <PRs awaiting your review>
+- <overdue tickets>, <due-soon tickets>, <pending incident reviews / remediation approvals>, <PRs awaiting your review>, <tickets with an unanswered `[QUESTION]`>
 - (or "Nothing urgent.")
 
 **In progress** — IN_PROGRESS tickets, oldest update first; flag any untouched for 5+ days

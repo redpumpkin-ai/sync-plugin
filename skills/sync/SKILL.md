@@ -19,6 +19,7 @@ Lists the Sync skills. It does no work itself: answer with the table below, pick
 | Plan or create a ticket, log progress, comment, groom | `/sync:sync-tickets` | `$sync-tickets` |
 | Start a ticket (branch → IN_PROGRESS) | `/sync:sync-start-ticket <KEY>` | `$sync-start-ticket <KEY>` |
 | Finish a ticket (verify, commit, PR → IN_REVIEW) | `/sync:sync-complete-ticket` | `$sync-complete-ticket` |
+| Let an agent carry tickets to a draft PR unattended, e.g. overnight | `/sync:sync-run-ticket <KEY ...\|--queue> [--yolo]` | `$sync-run-ticket <KEY ...\|--queue> [--yolo]` |
 | Write, find or update project docs (hand-off, ADR, PRD, runbook, postmortem, meeting, roadmap) | `/sync:sync-docs <template>` | `$sync-docs <template>` |
 | Turn a PRD or project doc into a project, repo, milestones and tickets | `/sync:sync-plan-from-doc <path-or-doc-id>` | `$sync-plan-from-doc <path-or-doc-id>` |
 | Bring a project in line with a schedule or plan | `/sync:sync-projects` | `$sync-projects` |
@@ -26,6 +27,7 @@ Lists the Sync skills. It does no work itself: answer with the table below, pick
 | Audit tickets for stale or missing content | `/sync:sync-ticket-audit` | `$sync-ticket-audit` |
 | Get the digest on a schedule | `/sync:sync-schedule-digest` | `$sync-schedule-digest` |
 | Set up a repo's Sync rules (once per repo) | `/sync:sync-init` | `$sync-init` |
+| Learn how to use Sync after install (commit-message rules, skill flow, extra tools, companion skills) | `/sync:sync-setup` | `$sync-setup` |
 
 Ticket status follows GitHub: push the branch → IN_PROGRESS, open the PR → IN_REVIEW, approve → APPROVED, merge → DONE.
 
