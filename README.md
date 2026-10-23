@@ -237,19 +237,22 @@ Use the claude.ai Sync connector (connector steps: `skills/sync-schedule-digest/
 
 ## Releases
 
-Plugin releases are cut by one person and go through five steps:
+`main` is the released state and the default branch, so it is what `marketplace add` and `plugin update` fetch. Work happens on `develop`; nothing reaches users until it is merged into `main`. Releases are cut by one person:
 
 1. If the release needs a server change, merge and deploy it first. `compat.json` and the top CHANGELOG entry list the Sync MCP tools the skills call; the server must already offer all of them.
-2. Merge the plugin PR into `main`. It bumps the version in the five places (both `plugin.json`, the Claude `marketplace.json`, and the `X-Sync-Plugin` header in `.mcp.json` and `.codex-plugin/mcp.json`) and finishes the CHANGELOG entry (replace "belum dirilis" with the release date).
-3. Push the tag `vX.Y.Z`. The release workflow checks that the tag equals the manifest version and that the CHANGELOG entry is finished, then creates the GitHub Release automatically.
+2. Open a release PR from `develop` into `main`. It bumps the version in the five places (both `plugin.json`, the Claude `marketplace.json`, and the `X-Sync-Plugin` header in `.mcp.json` and `.codex-plugin/mcp.json`) and finishes the CHANGELOG entry (replace "belum dirilis" with the release date). Merge it only after step 1, because installed users can update to `main` from that moment.
+3. Push the tag `vX.Y.Z` on the merge commit. The release workflow checks that the tag equals the manifest version and that the CHANGELOG entry is finished, then creates the GitHub Release automatically.
 4. A PR in the Sync app repository moves the plugin submodule pointer to the tagged commit. The compat check must be green and a human must read the plugin diff before approving.
-5. Deploy after approval. If a `stable` ref is in use, move it to the new tag.
+5. Deploy after approval. Sync shows the pinned version, so what it displays is always a released one.
 
-Rollback: revert the version bump in the Sync app repository, redeploy the previous image, and move `stable` back to the previous tag.
+### Rollback
+
+- **What Sync shows:** revert the pointer bump in the Sync app repository and redeploy the previous image.
+- **What users installed:** revert the release merge on `main` and release a patch version (`X.Y.Z+1`) with the previous content. Updates are version-based, so a rollback ships as a higher number; whether a lower one would be offered is not verified. Never delete or move a tag and never force-push `main`; a fix is always a new version.
 
 ## Contributing
 
-- Open a PR against `main`. Changes need a review from the code owner (`.github/CODEOWNERS`). Workflows from outside contributors need maintainer approval before they run.
+- Open a PR against `develop` (not `main`). Changes need a review from the code owner (`.github/CODEOWNERS`). Workflows from outside contributors need maintainer approval before they run.
 - Before you push, run the same checks CI runs:
 
   ```bash
