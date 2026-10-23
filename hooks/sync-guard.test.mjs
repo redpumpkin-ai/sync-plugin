@@ -262,6 +262,15 @@ describe("sync-guard: fungsi murni", () => {
       expect(isChangeStatusTool("change_ticket_status")).toBe(true);
     });
 
+    it("true untuk konektor Codex yang hanya satu garis bawah sebelum nama tool", () => {
+      expect(isChangeStatusTool("mcp__codex_apps__sync_by_rp_change_ticket_status")).toBe(true);
+    });
+
+    it("false untuk nama yang hanya mirip konektor Codex", () => {
+      expect(isChangeStatusTool("mcp__x__sync_by_rp_other_change_ticket_status")).toBe(false);
+      expect(isChangeStatusTool("mcp__codex_apps__not_sync_by_rp_change_ticket_status")).toBe(false);
+    });
+
     it("false untuk tool lain, nama yang hanya mirip, dan bukan string", () => {
       expect(isChangeStatusTool("mcp__plugin_sync_sync__get_ticket")).toBe(false);
       expect(isChangeStatusTool("mcp__x__not_change_ticket_status")).toBe(false);

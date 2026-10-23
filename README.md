@@ -142,6 +142,7 @@ Checked on 2026-10-23 against the Claude Code and Codex hooks documentation, rea
 | Claude Code, plugin server | `mcp__plugin_sync_sync__change_ticket_status` | Verified: the documented naming rule, and real transcripts show this call with `tool_input` `{ticket, status}` |
 | Claude Code, claude.ai connector | `mcp__claude_ai_Sync_by_RP__change_ticket_status` | Verified: real transcripts show this call with the same `tool_input` |
 | Codex, plugin server | `mcp__sync__change_ticket_status` | Not verified: only the documented `mcp__<server>__<tool>` pattern. Local logs show the plugin's calls under server `sync`, but no hook payload has been observed |
+| Codex, connector | `mcp__codex_apps__sync_by_rp_change_ticket_status` | Not verified: seen in Codex tool declarations only, never as a hook payload. The script accepts the `sync_by_rp_` prefix for it |
 
 Also not verified: the shape of `tool_response` for MCP tools (undocumented), the Codex `tool_input` shape, and whether a marketplace install runs plugin hooks in Codex. So the hook reads the new status from `tool_input.status` only and uses `tool_response` just to skip failed calls. The matcher in `hooks/hooks.json` is the tolerant suffix `change_ticket_status$` and the script checks the name again. If a CLI sends the status somewhere else, the hook stays silent and the `sync-complete-ticket` offer is the fallback.
 
@@ -156,8 +157,7 @@ The Codex side is untested on a real install, in particular on Windows, where th
 - A workspace folder that is not itself a git repository gets no reminders.
 - Documentation done by a subagent is not seen; only the main transcript is read.
 - The Stop hook blocks at most once per session, and never when it cannot read the transcript.
-- Status changes made by GitHub events or by the Sync web app never reach the PostToolUse hook. The Codex connector name `mcp__codex_apps__sync_by_rp_change_ticket_status` matches the matcher but not the script's name check, so it stays silent too.
-
+- Status changes made by GitHub events or by the Sync web app never reach the PostToolUse hook.
 ## Permission prompts (Claude Code)
 
 - Local git commands run without prompts.

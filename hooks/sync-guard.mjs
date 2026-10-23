@@ -166,12 +166,15 @@ const NEXT_TICKET_STATUSES = new Set(["IN_REVIEW", "DONE"]);
  * True bila nama tool adalah tool status Sync. Matcher di hooks.json sengaja longgar
  * (`change_ticket_status$`) karena hanya nama Claude Code yang terverifikasi; di sini
  * nama dicek ulang dengan batas, agar `not_change_ticket_status` tidak dihitung
- * (PLAN-SyncPlugin-v0.4 Phase 5b).
+ * (PLAN-SyncPlugin-v0.4 Phase 5b). Konektor Codex mendeklarasikan nama
+ * `mcp__codex_apps__sync_by_rp_change_ticket_status` (satu `_` sebelum nama tool), jadi
+ * awalan `sync_by_rp_` diterima sebagai batas, tetapi hanya bila ia sendiri berdiri di
+ * batas (bukan `not_sync_by_rp_`). Nama ini belum pernah teramati sebagai payload hook.
  */
 export function isChangeStatusTool(name) {
   if (typeof name !== "string" || !name.endsWith(CHANGE_STATUS_TOOL)) return false;
   const before = name.slice(0, name.length - CHANGE_STATUS_TOOL.length);
-  return before === "" || /(?:__|[.:/])$/.test(before);
+  return before === "" || /(?:__|[.:/])$|(?:^|__|[.:/])sync_by_rp_$/.test(before);
 }
 
 /**
