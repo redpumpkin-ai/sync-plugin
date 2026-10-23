@@ -8,7 +8,7 @@ Skills that make coding agents (Claude Code, Codex) follow the team's Sync by Re
 | `sync-tickets` | Plan and create a ticket (with a duplicate check), log progress, phases, blockers and hand-offs as ticket comments, and groom tickets. Status is left to GitHub. |
 | `sync-init` | Write the team's Sync rules into a repo's `AGENTS.md` and connect `CLAUDE.md` to it. Run once per repo, or again when the rules change. |
 | `sync-start-ticket <KEY>` | Check out the ticket branch and push it. The push moves the ticket to IN_PROGRESS. |
-| `sync-complete-ticket [KEY]` | Verify, commit, push and open a PR (which moves the ticket to IN_REVIEW), then comment on the ticket. You have to invoke it yourself. |
+| `sync-complete-ticket [KEY]` | Verify, commit, push and open a PR (which moves the ticket to IN_REVIEW), then comment on the ticket and offer the next ticket. You have to invoke it yourself. |
 | `sync-docs <handoff\|adr\|prd\|runbook\|postmortem\|meeting\|roadmap\|blank\|search\|update\|publish> [title-or-query] [--ticket KEY] [--project NAME]` | Write project docs in Sync Knowledge from a template, link them to the ticket, and publish after you approve. |
 | `sync-plan-from-doc <path-or-doc-id> [--project NAME]` | Read a PRD or project doc, propose the project, milestones, tickets, assignees and repo, and create them after you approve. |
 | `sync-digest` | Show what's on your plate: open tickets, overdue or due-soon tickets, incident reviews waiting on you, and PRs waiting for your review. Read-only. |
@@ -101,21 +101,22 @@ GitHub moves the ticket at every step, through the Sync GitHub App. Agents never
 
 ## Hooks (reminders)
 
-The plugin ships two hooks, both run by one small script (`hooks/sync-guard.mjs`):
+The plugin ships three hooks, all run by one small script (`hooks/sync-guard.mjs`):
 
 - **SessionStart** adds the current branch and its ticket key to the agent's context. When the branch has no key it adds a reminder to run `/sync-tickets` or `/sync-start-ticket` instead. It also remembers the commit the session started at.
 - **Stop** asks the agent, once per session, to document new commits when the session made commits but never called `add_ticket_comment`, `create_document` or `update_document`. The agent is pointed at `/sync-tickets` (`[UPDATE]`) and `/sync-docs`.
+- **PostToolUse** (only for `change_ticket_status`) fires when that tool moves a ticket to IN_REVIEW or DONE. It asks the agent to call `get_my_work_summary`, propose up to three next tickets (highest priority first, then the same milestone, skipping tickets with an unanswered `[QUESTION]`) and wait for your pick. It does not fire when GitHub moves the status (PR opened or merged), which is why `sync-complete-ticket` ends with the same offer.
 
 Things to know:
 
-- They only run in a git repo whose root `AGENTS.md` has the Sync block written by `sync-init`. Everywhere else they print nothing.
+- SessionStart and Stop only run in a git repo whose root `AGENTS.md` has the Sync block written by `sync-init`. Everywhere else they print nothing. PostToolUse has no such condition: it fires only after the Sync status tool, which is itself proof of Sync use, and a condition would silence it in workspace folders that hold several repos.
 - They never call Sync. They only add context or ask the agent to run the skills above. The reminder texts are in Indonesian.
 - `node` (18 or newer) must be on `PATH`. Without it the client shows a hook error notice at session start; `SYNC_HOOKS=off` silences it.
 - The hooks arrive with the next plugin release. The installed 0.3.0 does not have them; `claude --plugin-dir .` loads them for testing.
 
 ### Turn the hooks off
 
-`SYNC_HOOKS=off` turns off both hooks.
+`SYNC_HOOKS=off` turns off all three hooks.
 
 ```bash
 # bash or zsh, for one session
@@ -132,6 +133,18 @@ $env:SYNC_HOOKS = "off"
 { "env": { "SYNC_HOOKS": "off" } }
 ```
 
+### Tool name the PostToolUse matcher sees
+
+Checked on 2026-10-23 against the Claude Code and Codex hooks documentation, real Claude Code session transcripts and local Codex session logs.
+
+| CLI | Tool name | Status |
+|---|---|---|
+| Claude Code, plugin server | `mcp__plugin_sync_sync__change_ticket_status` | Verified: the documented naming rule, and real transcripts show this call with `tool_input` `{ticket, status}` |
+| Claude Code, claude.ai connector | `mcp__claude_ai_Sync_by_RP__change_ticket_status` | Verified: real transcripts show this call with the same `tool_input` |
+| Codex, plugin server | `mcp__sync__change_ticket_status` | Not verified: only the documented `mcp__<server>__<tool>` pattern. Local logs show the plugin's calls under server `sync`, but no hook payload has been observed |
+
+Also not verified: the shape of `tool_response` for MCP tools (undocumented), the Codex `tool_input` shape, and whether a marketplace install runs plugin hooks in Codex. So the hook reads the new status from `tool_input.status` only and uses `tool_response` just to skip failed calls. The matcher in `hooks/hooks.json` is the tolerant suffix `change_ticket_status$` and the script checks the name again. If a CLI sends the status somewhere else, the hook stays silent and the `sync-complete-ticket` offer is the fallback.
+
 ### Codex
 
 Codex has a hooks feature (checked against the Codex hooks documentation on 2026-10-22), but Codex's plugin build documentation lists lifecycle hooks only for manually installed desktop plugins. Whether a plugin installed from a marketplace runs these hooks is unverified. If hooks do run, Codex reads the same `hooks/hooks.json` from the plugin root and gives hook commands the plugin root as `PLUGIN_ROOT`, plus `CLAUDE_PLUGIN_ROOT` for compatibility. Codex skips plugin hooks until you review and trust them, so after installing the plugin run `/hooks` once.
@@ -143,6 +156,7 @@ The Codex side is untested on a real install, in particular on Windows, where th
 - A workspace folder that is not itself a git repository gets no reminders.
 - Documentation done by a subagent is not seen; only the main transcript is read.
 - The Stop hook blocks at most once per session, and never when it cannot read the transcript.
+- Status changes made by GitHub events or by the Sync web app never reach the PostToolUse hook. The Codex connector name `mcp__codex_apps__sync_by_rp_change_ticket_status` matches the matcher but not the script's name check, so it stays silent too.
 
 ## Permission prompts (Claude Code)
 
