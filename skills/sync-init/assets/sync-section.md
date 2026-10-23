@@ -28,7 +28,8 @@ The Sync GitHub App moves tickets when git events happen, so an agent moves a ti
 ### Conventions
 
 - Branch: exactly the name returned by `get_ticket_branch_name`, character for character. It may include a type prefix such as `fix/`.
-- Commit and PR title: Conventional Commits with the ticket key as scope, e.g. `fix(SYN-12): handle empty cart`.
+- Commits: Conventional Commits in English. Subject `type(scope): subject` with type one of feat, fix, refactor, docs, test, perf, build, ci, chore, revert; imperative, 72 characters at most; the scope is the code area, never the ticket key. Body: one `- path/to/file: what changed and why` bullet per file (group by area above 12 files). Footer: `Refs: SYN-12`, the key taken from the branch name.
+- PR: the title has the same `type(scope): subject` form without the key, and the description ends with `Refs: SYN-12`.
 - An agent's work on a ticket ends at an open PR. Merging is a human decision.
 - Run the repo's verify command before opening a PR. If it fails, fix the cause or stop; a red PR is not done.
 - Write commit messages and PR descriptions in English. Write ticket text and comments in the user's language, keeping comment tags such as `[START]` and `[DONE]` in English.

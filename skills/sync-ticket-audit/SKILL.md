@@ -28,6 +28,7 @@ Sync tools may carry a client prefix; this skill uses bare names. If they are no
    | Description holds stale phrases ("schedule TBD", "temporary PIC") | high |
    | No acceptance criteria | medium |
    | No start or end date; no milestone | medium |
+   | IN_REVIEW or DONE with no `[DONE]` comment (fix: post the structured `[DONE]` via sync-complete-ticket or a comment from sync-tickets) | medium |
    | Comment without a tag (`[START]`, `[PLAN]`, `[DONE]`, `[UPDATE]`, `[BLOCKED]`, `[HANDOFF]`) | low |
    | Comment body not in the user's language | low |
 
