@@ -36,9 +36,9 @@ A template name (handoff, adr, prd, runbook, postmortem, meeting, roadmap, blank
 
 ## Update and publish
 
-- update: `get_document`, change only what is stale, show it, wait for agreement. `update_document` with expectedVersion and ticketIds = all linked `tickets[].id` plus the new one (the list is replaced). Then `publish_document` with the returned version only if status was PUBLISHED, then a DOC comment on what changed.
-- publish: `get_document`, show what readers will see, agreement, `publish_document`. An ARCHIVED document is refused (restore it in the Sync UI).
+- update: `get_document(includeContent:true)`, change only what is stale, show it, wait for agreement. `update_document` with expectedVersion and ticketIds = all linked `tickets[].id` plus the new one (the list is replaced). Then `publish_document` with the returned version only if status was PUBLISHED, then a DOC comment on what changed.
+- publish: `get_document(includeContent:true)`, show what readers will see, agreement, `publish_document`. An ARCHIVED document is refused (restore it in the Sync UI).
 
 ## Conflicts
 
-Stale version or 409: `get_document` again, re-apply the change on the new content, never retry the same call.
+Stale version or 409: `get_document(includeContent:true)` again, re-apply the change on the new content, never retry the same call.
