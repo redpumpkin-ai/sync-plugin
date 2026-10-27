@@ -136,22 +136,23 @@ The Sync app's Guide page (`https://sync.redpumpkin.ai/guide#daily-flow`) walks 
 
 ## Hooks (reminders)
 
-The plugin ships three hooks, all run by one small script (`hooks/sync-guard.mjs`):
+The plugin ships four hooks, all run by one small script (`hooks/sync-guard.mjs`):
 
 - **SessionStart** adds the current branch and its ticket key to the agent's context. When the branch has no key it adds a reminder to run `/sync-tickets` or `/sync-start-ticket` instead. It also remembers the commit the session started at.
+- **Update check** (SessionStart, new sessions only) tells you when a newer plugin version is on GitHub, with the update commands for Claude Code and Codex. It runs in any folder, makes at most one request per 24 hours to the plugin repository's `main` (a failed request is remembered for 24 hours too) and prints nothing when you are up to date.
 - **Stop** asks the agent, once per session, to document new commits when the session made commits but never called `add_ticket_comment`, `create_document` or `update_document`. The agent is pointed at `/sync-tickets` (`[UPDATE]`) and `/sync-docs`.
 - **PostToolUse** (only for `change_ticket_status`) fires when that tool moves a ticket to IN_REVIEW or DONE. It asks the agent to call `get_my_work_summary`, propose up to three next tickets (highest priority first, then the same milestone, skipping tickets with an unanswered `[QUESTION]`) and wait for your pick. It does not fire when GitHub moves the status (PR opened or merged), which is why `sync-complete-ticket` ends with the same offer.
 
 Things to know:
 
 - SessionStart and Stop only run in a git repo whose root `AGENTS.md` has the Sync block written by `sync-init`. Everywhere else they print nothing. PostToolUse has no such condition: it fires only after the Sync status tool, which is itself proof of Sync use, and a condition would silence it in workspace folders that hold several repos.
-- They never call Sync. They only add context or ask the agent to run the skills above. The reminder texts are in Indonesian.
+- They never call Sync (the update check makes one GitHub request per day, nothing else). They only add context or ask the agent to run the skills above. The reminder texts are in Indonesian.
 - `node` (18 or newer) must be on `PATH`. Without it the client shows a hook error notice at session start; `SYNC_HOOKS=off` silences it.
 - The hooks arrive with 0.4.0. An installed 0.3.0 does not have them; `claude --plugin-dir .` loads them for testing.
 
 ### Turn the hooks off
 
-`SYNC_HOOKS=off` turns off all three hooks.
+`SYNC_HOOKS=off` turns off all four hooks, including the update check.
 
 ```bash
 # bash or zsh, for one session

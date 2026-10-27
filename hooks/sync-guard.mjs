@@ -16,7 +16,12 @@
  * sengaja tanpa syarat repo: pemicunya panggilan tool status Sync yang eksplisit, itu
  * sendiri sudah bukti Sync dipakai, dan syarat repo akan membisukannya di folder
  * workspace berisi banyak repo yang didukung `sync-init` (PLAN-SyncPlugin-v0.4 Phase 5b).
- * `SYNC_HOOKS=off` mematikan ketiganya.
+ * `SYNC_HOOKS=off` mematikan semuanya.
+ *
+ * Hook keempat, `update-check` (SessionStart `startup`), mengingatkan bila plugin terpasang
+ * lebih lama dari `main` di GitHub. Ia jalan di folder mana pun (tanpa syarat repo), tidak
+ * pernah memanggil Sync, dan hanya membuat satu request ke GitHub per 24 jam; hasil gagal
+ * ikut di-cache supaya jaringan yang mati tidak menambah penundaan di tiap sesi.
  *
  * Skrip ini Node murni tanpa dependensi (hanya modul `node:`), jalan di Node 18+.
  * `TICKET_REF_PATTERN` harus tetap sama dengan pola ticket-ref yang dipakai aplikasi
@@ -365,6 +370,50 @@ function handlePostToolUse(input) {
   );
 }
 
+export const LATEST_MANIFEST_URL =
+  "https://raw.githubusercontent.com/redpumpkin-ai/sync-plugin/main/.claude-plugin/plugin.json";
+const UPDATE_CHECK_TTL_MS = 24 * 60 * 60 * 1000;
+const VERSION_PATTERN = /^\d+\.\d+\.\d+$/;
+
+/** Pengingat singkat bila `latest` lebih baru dari `installed`; null untuk nilai tidak valid. */
+export function updateReminder(installed, latest) {
+  if (!VERSION_PATTERN.test(installed ?? "") || !VERSION_PATTERN.test(latest ?? "")) return null;
+  const a = latest.split(".").map(Number);
+  const b = installed.split(".").map(Number);
+  const i = a.findIndex((n, k) => n !== b[k]);
+  if (i === -1 || a[i] < b[i]) return null;
+  return `Sync plugin ${installed} is outdated; ${latest} is available. Claude Code: \`claude plugin marketplace update redpumpkin\` then \`claude plugin update sync@redpumpkin\`. Codex: \`codex plugin marketplace upgrade redpumpkin\` then \`codex plugin add sync@redpumpkin\`. Then restart the session.`;
+}
+
+/** Versi terbaru, paling banyak satu request per 24 jam. Gagal ikut di-cache. Tidak pernah melempar. */
+export async function resolveLatest({ cacheFile, now = Date.now(), fetchImpl = globalThis.fetch }) {
+  try {
+    const cached = JSON.parse(fs.readFileSync(cacheFile, "utf8"));
+    if (now - cached.checkedAt < UPDATE_CHECK_TTL_MS) return VERSION_PATTERN.test(cached.latest ?? "") ? cached.latest : null;
+  } catch {}
+  let latest = null;
+  try {
+    const res = await fetchImpl(LATEST_MANIFEST_URL, { signal: AbortSignal.timeout(3000) });
+    const version = res.ok ? (await res.json()).version : null;
+    latest = VERSION_PATTERN.test(version ?? "") ? version : null;
+  } catch {}
+  try {
+    fs.writeFileSync(cacheFile, JSON.stringify({ checkedAt: now, latest }), { mode: 0o600 });
+  } catch {}
+  return latest;
+}
+
+async function handleUpdateCheck() {
+  if (isHooksOff(process.env)) return;
+  const installed = JSON.parse(
+    fs.readFileSync(new URL("../.claude-plugin/plugin.json", import.meta.url), "utf8"),
+  ).version;
+  const dir = process.env.CLAUDE_PLUGIN_DATA || os.tmpdir();
+  const latest = await resolveLatest({ cacheFile: path.join(dir, "sync-plugin-latest.json") });
+  const message = updateReminder(installed, latest);
+  if (message) process.stdout.write(JSON.stringify({ systemMessage: message }));
+}
+
 async function main() {
   try {
     const mode = process.argv[2];
@@ -379,6 +428,7 @@ async function main() {
     if (mode === "session-start") handleSessionStart(input);
     else if (mode === "stop") await handleStop(input);
     else if (mode === "post-tool-use") handlePostToolUse(input);
+    else if (mode === "update-check") await handleUpdateCheck();
   } catch {
     // jangan pernah merusak sesi
   } finally {
@@ -390,7 +440,8 @@ async function main() {
 if (
   process.argv[2] === "session-start" ||
   process.argv[2] === "stop" ||
-  process.argv[2] === "post-tool-use"
+  process.argv[2] === "post-tool-use" ||
+  process.argv[2] === "update-check"
 ) {
   await main();
 }

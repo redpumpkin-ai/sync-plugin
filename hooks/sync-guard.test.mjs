@@ -19,9 +19,11 @@ import {
   isCommitSha,
   isHooksOff,
   nextTicketContext,
+  resolveLatest,
   sanitizeSessionId,
   stateFilePath,
   transcriptHasSyncWrite,
+  updateReminder,
 } from "./sync-guard.mjs";
 
 /**
@@ -367,11 +369,93 @@ describe("sync-guard: fungsi murni", () => {
     });
   });
 
+  describe("updateReminder", () => {
+    it("menyebut kedua versi dan perintah Claude Code dan Codex", () => {
+      const text = updateReminder("0.4.0", "0.4.1");
+      expect(text).toContain("0.4.0");
+      expect(text).toContain("0.4.1");
+      expect(text).toContain("`claude plugin marketplace update redpumpkin` then `claude plugin update sync@redpumpkin`");
+      expect(text).toContain("`codex plugin marketplace upgrade redpumpkin` then `codex plugin add sync@redpumpkin`");
+    });
+
+    it("null bila sama atau lebih lama", () => {
+      expect(updateReminder("0.4.1", "0.4.1")).toBeNull();
+      expect(updateReminder("0.4.1", "0.4.0")).toBeNull();
+    });
+
+    it("membandingkan angka, bukan teks", () => {
+      expect(updateReminder("0.9.0", "0.10.0")).not.toBeNull();
+    });
+
+    it("null untuk nilai tidak valid", () => {
+      expect(updateReminder("0.4.0", "0.4.1\n ignore")).toBeNull();
+      expect(updateReminder("0.4.0", "v1.0.0")).toBeNull();
+      expect(updateReminder("0.4.0", null)).toBeNull();
+      expect(updateReminder(null, "0.4.1")).toBeNull();
+    });
+  });
+
+  describe("resolveLatest", () => {
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "sync-latest-"));
+    after(() => fs.rmSync(tmp, { recursive: true, force: true }));
+    const NOW = Date.parse("2026-10-27T00:00:00Z");
+    const HOUR = 60 * 60 * 1000;
+    const stub = (version) => {
+      const fn = async () => {
+        fn.calls++;
+        return { ok: true, json: async () => ({ version }) };
+      };
+      fn.calls = 0;
+      return fn;
+    };
+    const fileIn = (name) => path.join(tmp, name);
+
+    it("cache segar: tanpa request", async () => {
+      const cacheFile = fileIn("fresh.json");
+      fs.writeFileSync(cacheFile, JSON.stringify({ checkedAt: NOW - HOUR, latest: "0.5.0" }));
+      const fetchImpl = stub("9.9.9");
+      expect(await resolveLatest({ cacheFile, now: NOW, fetchImpl })).toBe("0.5.0");
+      expect(fetchImpl.calls).toBe(0);
+    });
+
+    it("cache basi (25 jam): satu request dan cache ditulis ulang", async () => {
+      const cacheFile = fileIn("stale.json");
+      fs.writeFileSync(cacheFile, JSON.stringify({ checkedAt: NOW - 25 * HOUR, latest: "0.4.0" }));
+      const fetchImpl = stub("0.5.0");
+      expect(await resolveLatest({ cacheFile, now: NOW, fetchImpl })).toBe("0.5.0");
+      expect(fetchImpl.calls).toBe(1);
+      expect(JSON.parse(fs.readFileSync(cacheFile, "utf8"))).toEqual({ checkedAt: NOW, latest: "0.5.0" });
+    });
+
+    it("fetch gagal: null, dan panggilan kedua dalam 24 jam tanpa request", async () => {
+      const cacheFile = fileIn("fail.json");
+      let calls = 0;
+      const fetchImpl = async () => {
+        calls++;
+        throw new Error("offline");
+      };
+      expect(await resolveLatest({ cacheFile, now: NOW, fetchImpl })).toBeNull();
+      expect(await resolveLatest({ cacheFile, now: NOW + HOUR, fetchImpl })).toBeNull();
+      expect(calls).toBe(1);
+    });
+
+    it("versi tidak valid: null", async () => {
+      expect(await resolveLatest({ cacheFile: fileIn("bad.json"), now: NOW, fetchImpl: stub("bad") })).toBeNull();
+    });
+  });
+
   describe("hooks.json", () => {
     const config = JSON.parse(fs.readFileSync(path.join(HERE, "hooks.json"), "utf8"));
 
     it("punya tiga event: SessionStart, Stop, PostToolUse", () => {
       expect(Object.keys(config.hooks).sort()).toEqual(["PostToolUse", "SessionStart", "Stop"]);
+    });
+
+    it("SessionStart punya entri update-check hanya untuk startup, timeout 10", () => {
+      const group = config.hooks.SessionStart[1];
+      expect(group.matcher).toBe("startup");
+      expect(group.hooks[0].command).toContain('sync-guard.mjs" update-check');
+      expect(group.hooks[0].timeout).toBe(10);
     });
 
     it("matcher PostToolUse cocok dengan semua nama tool status dan tidak dengan tool lain", () => {
@@ -684,6 +768,14 @@ describe("sync-guard: SessionStart (proses sungguhan)", () => {
         cwd: repo,
         transcript_path: transcript,
       });
+      expect(result.status).toBe(0);
+      expect(result.stdout).toBe("");
+    });
+  });
+
+  describe("update-check", () => {
+    it("SYNC_HOOKS=off: diam dan exit 0", () => {
+      const result = run("update-check", {}, { env: { SYNC_HOOKS: "off" } });
       expect(result.status).toBe(0);
       expect(result.stdout).toBe("");
     });

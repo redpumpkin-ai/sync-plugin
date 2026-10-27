@@ -1,6 +1,6 @@
 # Repo states
 
-Ask the user whether the project already has a GitHub repository. Use `list_repositories` (with `project` when the project exists) to offer candidates. The installation's `accountLogin` is the owner; with several installations, ask which one. Nothing is created or linked before the plan table is approved.
+Ask the user whether the project already has a GitHub repository. Linked candidates come from `list_repositories` with `project`; unlinked ones need it without `project` or with a `query`. The installation's `accountLogin` is the owner; with several installations, ask which one. Nothing is created or linked before the plan table is approved.
 
 `gh` runs on the developer's machine and is the only way a repository is created: the Sync server and the GitHub App never create one. If `gh` is missing or not logged in, say so and mark the repo row "later".
 
@@ -9,7 +9,7 @@ Allowed `gh` use, nothing else (no delete, edit, clone or push):
 - Read only, allowed while planning, before approval: `gh repo view <owner>/<repo>` and GET calls of `gh api` on `repos/<owner>/<repo>` and `repos/<owner>/<repo>/commits`.
 - After approval only: `gh repo create <owner>/<name> --private`.
 
-Candidates: several matches in `list_repositories` means asking which one. The user says the repo exists but `list_repositories` shows none: the GitHub App cannot see it, so give the access steps below and mark the repo row "later".
+Candidates: several matches in `list_repositories` means asking which one. The user says the repo exists but `list_repositories` (no `project`) shows none: the GitHub App cannot see it, so give the access steps below and mark the repo row "later".
 
 "Later" is only for the "none" state, where `gh` is needed to create the repository. An existing repo that `list_repositories` shows does not need `gh` to be linked: if `gh` is unavailable and the user cannot say whether it is empty, treat it as having content, skip the mapping, and link it only after the user confirms it is the right repository (the row says "link, unverified"). The confirmation question for the "exists with content" state is asked together with the repo question, so the plan stays one table.
 

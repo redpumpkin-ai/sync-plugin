@@ -34,6 +34,7 @@ export const ALLOWED_CLIENT_IDS = ["sync-mcp-cli", "sync-mcp-inspector-claude"];
 export const ALLOWED_URL_HOSTS = [
   "sync.redpumpkin.ai",
   "github.com",
+  "raw.githubusercontent.com",
   "agent-plugins.org",
   "127.0.0.1",
   "localhost",
