@@ -1,5 +1,5 @@
 {
-  "description": "Sync: pengingat ticket saat sesi mulai, dokumentasi sebelum berhenti, dan tawaran ticket berikutnya setelah IN_REVIEW atau DONE. Matikan dengan SYNC_HOOKS=off.",
+  "description": "Sync: pengingat ticket saat sesi mulai, pengingat update plugin (sekali sehari), dokumentasi sebelum berhenti, dan tawaran ticket berikutnya setelah IN_REVIEW atau DONE. Matikan dengan SYNC_HOOKS=off.",
   "hooks": {
     "SessionStart": [
       {
@@ -8,6 +8,16 @@
             "type": "command",
             "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/sync-guard.mjs\" session-start",
             "timeout": 15
+          }
+        ]
+      },
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/sync-guard.mjs\" update-check",
+            "timeout": 10
           }
         ]
       }
