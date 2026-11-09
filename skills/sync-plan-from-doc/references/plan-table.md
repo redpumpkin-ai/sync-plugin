@@ -27,13 +27,12 @@ Under the table, list open questions from the source. Sources that are not tasks
 - **milestone**: from the source's own milestone, phase or implementation-plan headings (the sample PRD's section 6 gives M1 to M5). None found: ask the user.
 - **ticket granularity**: one ticket per deliverable or task item the source itself lists under a milestone, with its own acceptance criteria. Do not split below the source's granularity and do not merge items from different milestones. A milestone with no itemised tasks becomes one ticket per stated goal.
 - **draft sources**: a source marked Draft, or with undecided questions, is still ticketed. List each open question under the table and ask whether to continue before writing; tickets that depend on an open decision say so in Notes.
-- **ticket**: title at most 200 characters, imperative, unique in the project. Description is Goal, Scope, Acceptance criteria and Notes, as in `sync-tickets`, plus a last line with the PRD document title and URL. The URL line is a deliberate choice: the document is created before the tickets, and one irreversible comment per ticket would only add noise. Type is an uppercase Conventional Commit type; priority defaults to NORMAL; milestone from the milestone rows; dates only from the source.
+- **ticket**: title at most 200 characters, imperative, unique in the project. Description is Goal, Scope, Acceptance criteria and Notes, as in `sync-tickets`, plus a last line with the PRD document title and URL. The URL line is a deliberate choice: the document is created before the tickets, and one irreversible comment per ticket would only add noise. Type is an uppercase Conventional Commit type; priority defaults to NORMAL; milestone from the milestone rows; dates only from the source. Repositories: set `repositories` only when the source says which repos a ticket touches (each linked to the project first); left empty, the ticket accepts work from any repo of its project.
 - **assignee**: `create_ticket` requires one. Take it from `list_assignees`; when the source names nobody, default to the caller from `get_profile` and flag that in the table. Never invent a name.
 
 ## What cannot be set over MCP
 
 - Status: new tickets are BACKLOG.
-- A ticket's own repository: the repo is shown once at project level. Ticket-level repository stays a choice in the Sync UI.
 - A link from a ticket to a document at creation: see "Why the link is last" in execution-and-rerun.md.
 
 ## Limits

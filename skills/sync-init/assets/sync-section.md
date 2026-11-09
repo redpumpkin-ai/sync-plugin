@@ -27,7 +27,7 @@ The Sync GitHub App moves tickets when git events happen, so an agent moves a ti
 
 ### Conventions
 
-- Branch: exactly the name returned by `get_ticket_branch_name`, character for character. It may include a type prefix such as `fix/`.
+- Branch: exactly the name returned by `get_ticket_branch_name`, character for character. It may include a type prefix such as `fix/`. One branch per ticket: more work on the same ticket goes on that branch as a new PR, and a ticket with several repositories uses the same branch name in each repo. Only the ticket's first PR moves its status.
 - Commits: Conventional Commits in English. Subject `type(scope): subject` with type one of feat, fix, refactor, docs, test, perf, build, ci, chore, revert; imperative, 72 characters at most; the scope is the code area, never the ticket key. Body: one `- path/to/file: what changed and why` bullet per file (group by area above 12 files). Footer: `Refs: SYN-12`, the key taken from the branch name.
 - PR: the title has the same `type(scope): subject` form without the key, and the description ends with `Refs: SYN-12`.
 - An agent's work on a ticket ends at an open PR. Merging is a human decision.

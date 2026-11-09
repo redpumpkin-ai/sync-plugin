@@ -28,5 +28,5 @@ Read `../_shared/conventions.md` (`_shared/conventions.md` in a ZIP upload) for 
 ## Rules
 
 - Re-running creates nothing twice: every object is matched by exact name or title first (execution-and-rerun.md).
-- `create_ticket` cannot link a document or set a repository, so links go through `update_document`.
+- `create_ticket` cannot link a document, so links go through `update_document`. It can set `repositories` (each one linked to the project).
 - This skill never edits existing tickets; `sync-projects` brings an existing project in line with a schedule.

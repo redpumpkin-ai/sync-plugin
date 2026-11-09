@@ -30,6 +30,7 @@ Ticket status follows GitHub; nothing here moves it past BACKLOG or TODO.
 - **Project:** the row of the repo in the `AGENTS.md` Projects table; else `list_projects` (not CLOSED), ask if unclear. Never invent project, milestone or assignee names.
 - **Priority:** NORMAL unless the work says otherwise.
 - **Type:** uppercase Conventional Commit type (FEAT, FIX, REFACTOR, PERF, TEST, DOCS, STYLE, BUILD, CI, CHORE). It prefixes the branch name, so set it on create.
+- **Repositories:** every repo the work touches (`repositories`).
 
 ## Plan and create
 
