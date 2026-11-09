@@ -3,6 +3,17 @@
 Changes to the Sync agent plugin. Each entry lists the Sync MCP tools the skills call
 ("Requires: tool MCP ..."); a server release must keep every listed tool available.
 
+## 0.5.0 - belum dirilis
+
+Requires: tool MCP add_ticket_comment, change_ticket_status, create_document, create_milestone, create_project, create_ticket, get_document, get_my_work_summary, get_profile, get_project_dates, get_ticket, get_ticket_branch_name, get_ticket_dates, link_repository, list_assignees, list_document_spaces, list_milestones, list_my_pending_reviews, list_projects, list_repositories, list_ticket_comments, publish_document, search_documents, search_tickets, update_document, update_project_dates, update_ticket, update_ticket_dates
+
+Needs the Sync server with ticket repositories (SYN-55): `get_ticket` returns `repositories` and `create_ticket` accepts it.
+
+- One branch per ticket, in the shared conventions and the `sync-init` block: more work on a ticket (after a merge, a review follow-up, an addition) goes on the same branch as a new PR, never a second branch; a ticket with several repositories uses the same branch name in each repo. Only the ticket's first PR moves its status, so a follow-up PR leaves a DONE ticket DONE.
+- `sync-start-ticket` accepts a DONE ticket for more work on the same branch (merging `origin/<default>` first, or recreating a branch deleted after its merge), and checks `origin` against all of the ticket's `repositories`.
+- `sync-complete-ticket` opens a new PR when the branch's earlier PR is merged, runs once per repository for a multi-repo ticket, and no longer expects IN_REVIEW from a later PR.
+- `sync-tickets` and `sync-plan-from-doc` can set a ticket's `repositories` on `create_ticket`.
+
 ## 0.4.1 - 2026-10-27
 
 Requires: tool MCP add_ticket_comment, change_ticket_status, create_document, create_milestone, create_project, create_ticket, get_document, get_my_work_summary, get_profile, get_project_dates, get_ticket, get_ticket_branch_name, get_ticket_dates, link_repository, list_assignees, list_document_spaces, list_milestones, list_my_pending_reviews, list_projects, list_repositories, list_ticket_comments, publish_document, search_documents, search_tickets, update_document, update_project_dates, update_ticket, update_ticket_dates
