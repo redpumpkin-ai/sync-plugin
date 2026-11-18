@@ -17,7 +17,7 @@ Paths are relative to the skills folder. Shared rules are in `../_shared/convent
 
 | Argument or question | Open |
 |---|---|
-| `commit-rules`: commit messages, PR titles, per-tool setting, commit-msg hook | `references/commit-rules.md` |
+| `commit-rules`: commit messages, PR titles, per-tool setting, commit-msg and pre-push hooks | `references/commit-rules.md` |
 | `flow`: which skill comes when | `references/guide.md`, "The flow on one screen" |
 | `tools`: extra tools some skills need | `references/guide.md`, "Extra tools some skills need" |
 | `skills`: companion open-source skills | `references/guide.md`, "Companion open-source skills" |
@@ -26,7 +26,7 @@ No argument: show the flow section, list the four topics and ask which to open.
 
 ## Rules
 
-- Read and explain only. Install nothing, edit nothing, and offer the optional hook without installing it.
+- Read and explain only. Install nothing, edit nothing, and offer the optional hooks without installing them.
 - Per-tool MCP install tutorials are not here. Point to Settings -> MCP in the Sync app (`https://sync.redpumpkin.ai/settings/mcp`), where each tool has its steps (Claude Code, Codex, Qoder, agy, Trae, VSCode).
 - Keep every "belum diverifikasi" marker when relaying a table row.
 - Never invent a tool, a source or an install command that the references do not hold.
