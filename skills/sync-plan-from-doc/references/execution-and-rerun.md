@@ -11,7 +11,7 @@ Follow this order exactly. The document exists before the tickets, and the docum
 3. `link_repository`, with the ids from `list_repositories`. Skipped when the repo is already linked or the row says "later".
 4. The PRD document: first check for a Knowledge space (see "Knowledge space"), then `create_document` with template `prd`, no `ticketIds`, and the converted content, then `publish_document`. Skipped when the source is already a document.
 5. `create_milestone` for each milestone row that says create.
-6. For each ticket row: `search_tickets` for the exact title in the project, then `create_ticket`, then `update_ticket_dates` when the row has dates. Check again right before each write.
+6. For each ticket row: `search_tickets` for the exact title in the project, then `create_ticket`, then `update_ticket_dates` when the row has dates. Check again right before each write. Parent rows are created before their children: a child's `create_ticket` carries the parent's key as `parent`. The parent must have no repository, no branch/PR/commit link and no incident (`../../sync-tickets/references/subtasks.md`).
 7. Finally `get_document`, then `update_document` with `ticketIds` = the ids already in the document's `tickets` plus the new ticket ids. No second publish is needed.
 
 ## Why the link is last
@@ -70,4 +70,4 @@ Re-run specifics:
 
 ## Report
 
-Print: project link; document title and URL; repo and its state; ticket keys grouped as created, reused, uncertain and failed (with the reason); steps skipped; and what is left for the Sync UI (ticket-level repository, the Knowledge space if it was missing).
+Print: project link; document title and URL; repo and its state; ticket keys grouped as created, reused, uncertain and failed (with the reason), parents listed with their children; steps skipped; and what is left for the Sync UI (the Knowledge space if it was missing).
