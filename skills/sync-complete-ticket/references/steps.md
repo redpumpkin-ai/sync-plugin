@@ -6,7 +6,7 @@ Takes finished work on a Sync ticket to an open PR and tells the ticket about it
 
 Sync tools may carry a client prefix (e.g. `mcp__sync__get_ticket`); this skill uses bare names.
 
-1. **Identify the ticket and its repo.** If the `AGENTS.md` Sync section has a Projects table, the repo is the ticket's row as that section describes; run every git command below there (`git -C <path> ...`) and pass `--repo <GitHub repo>` to `gh`. No table → the current repo. Use the argument if given. Otherwise derive the key from the repo's branch (with several rows and no argument, ask which repo): `syn-29-skills-for-sync-mcp` or `feat/syn-29-skills-for-sync-mcp` → `SYN-29`. Call `get_ticket` and note its `type` (may be null). DONE or CANCELED → stop and tell the user.
+1. **Identify the ticket and its repo.** If the `AGENTS.md` Sync section has a Projects table, the repo is the ticket's row as that section describes; run every git command below there (`git -C <path> ...`) and pass `--repo <GitHub repo>` to `gh`. No table → the current repo. Use the argument if given. Otherwise derive the key from the repo's branch (with several rows and no argument, ask which repo): `syn-29-skills-for-sync-mcp` or `feat/syn-29-skills-for-sync-mcp` → `SYN-29`. Call `get_ticket` and note its `type` (may be null). CANCELED → stop and tell the user. DONE → continue only when the user confirms this is more work on the same ticket ("One branch per ticket" in conventions); otherwise stop. A ticket with several repositories gets one PR per repo from the same branch name: run these steps once per repo.
 
 2. **Be on the ticket branch.** Compare with `get_ticket_branch_name`.
    - On the default branch with uncommitted work → `git stash push -u`, switch to the ticket branch (create it from `origin/<default>` if missing), `git stash pop`. Never commit to the default branch.
@@ -26,7 +26,8 @@ Sync tools may carry a client prefix (e.g. `mcp__sync__get_ticket`); this skill 
 
 9. **Open or reuse the PR.** `gh pr view <branch> --json url,state`:
    - OPEN → the push already updated it; keep that PR.
-   - MERGED or CLOSED → stop and ask.
+   - MERGED → the earlier PR is done; this is more work on the same ticket, so open a new PR as in "none" below.
+   - CLOSED → stop and ask whether to reopen it or open a new PR.
    - none (`gh` exits 1 with "no pull requests found": expected, not an error) → `gh pr create --base <default> --head <branch> --title "<type>(<scope>): <subject>" --body <body>`, the same form as the commit subject (step 6) without the key, body shaped as:
 
      ```
@@ -40,7 +41,7 @@ Sync tools may carry a client prefix (e.g. `mcp__sync__get_ticket`); this skill 
      Refs: <KEY>
      ```
 
-10. **Confirm the move.** Wait a few seconds, `get_ticket`. Expect IN_REVIEW for a new PR. If it did not move, tell the user (the GitHub App may not cover this repo); leave the status alone. Step 11 reuses this `get_ticket` call for the commit links.
+10. **Confirm the move.** Wait a few seconds, `get_ticket`. Expect IN_REVIEW for the ticket's first PR. A later PR (more work after a merge, or a second repository) does not move the status; say so and go on. If the first PR did not move it, tell the user (the GitHub App may not cover this repo); leave the status alone. Step 11 reuses this `get_ticket` call for the commit links.
 
 11. **Report to the ticket (the `[DONE]` comment).** In this order:
     - a. `list_ticket_comments`. A `[DONE]` already exists → do not post another. If the PR gained commits since, post an `[UPDATE]` that states what changed after the earlier `[DONE]`.

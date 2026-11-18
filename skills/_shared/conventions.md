@@ -56,6 +56,13 @@ Open the pull request from the ticket branch: the server links the PR to the tic
 - Type: when the ticket has a `type` that is in the list above, use it lowercased, so the branch prefix, the commits and the PR title share one type. When the ticket has no type, or its type is not in the list (ticket types include STYLE, which the list lacks), pick the closest listed type yourself.
 - The Sync server reads the ticket key from the branch name. The footer is for people and `git log`.
 
+## One branch per ticket
+
+- A ticket has exactly one branch, the name from `get_ticket_branch_name`. Never make a second branch for the same ticket (no `-v2`, `-part2` or `-followup` suffix).
+- More work on the same ticket (a fix after merge, a review follow-up, an addition) goes on that same branch as a new PR. If the earlier PR was merged and the remote branch still exists, merge `origin/<default>` into it first so the new PR shows only the new work. If the branch was deleted after the merge, create it again from `origin/<default>` with the same name. Never force-push.
+- A ticket that touches several repositories (`repositories` in `get_ticket`) uses the same branch name in each repo and gets one PR per repo.
+- Only the ticket's first PR moves its status. Later PRs, in the same repo or another one, are linked to the ticket but do not move it: a DONE ticket stays DONE while a follow-up PR is open. Tell the user when that applies instead of changing the status by hand.
+
 ## Comment tags
 
 Start every comment with its tag.

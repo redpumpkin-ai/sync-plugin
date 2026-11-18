@@ -39,7 +39,7 @@ Sync tools may carry a client prefix (e.g. `mcp__sync__get_ticket`); this skill 
 
 ## Steps
 
-Read `references/steps.md` first. It holds the full text of each step and the status table. In order: 1 read the ticket, 2 check it is startable by status (DONE or CANCELED: stop; assigned to someone else: ask first), 3 find the repo (if the ticket's repository differs from `origin`, stop and ask), 4 protect local work (never discard changes), 5 get onto the branch (use the name from `get_ticket_branch_name` exactly), 6 push it now, 7 confirm the move, 8 brief the user.
+Read `references/steps.md` first. It holds the full text of each step and the status table. In order: 1 read the ticket, 2 check it is startable by status (CANCELED: stop; DONE: same branch, new PR; other assignee: ask), 3 find the repo (if `origin` is not one of the ticket's repositories, stop and ask), 4 protect local work (never discard changes), 5 get onto the branch (use the name from `get_ticket_branch_name` exactly), 6 push it now, 7 confirm the move, 8 brief the user.
 
 ## Handover
 
