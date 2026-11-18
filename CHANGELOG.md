@@ -3,6 +3,21 @@
 Changes to the Sync agent plugin. Each entry lists the Sync MCP tools the skills call
 ("Requires: tool MCP ..."); a server release must keep every listed tool available.
 
+## 0.4.2 - 2026-11-18
+
+Requires: tool MCP add_ticket_comment, change_ticket_status, create_document, create_milestone, create_project, create_ticket, get_document, get_my_work_summary, get_profile, get_project_dates, get_ticket, get_ticket_branch_name, get_ticket_dates, link_repository, list_assignees, list_document_spaces, list_milestones, list_my_pending_reviews, list_projects, list_repositories, list_ticket_comments, post_project_update, publish_document, search_documents, search_tickets, update_document, update_project_dates, update_ticket, update_ticket_dates
+
+Needs the Sync server with sub-tasks and one repository per ticket: `create_ticket` accepts `parent` and a single `repository` (`repositories` is deprecated), `get_ticket` returns `parent` and `children`, and `change_ticket_status` refuses a parent whose status is computed from its children.
+
+- One branch per ticket, in the shared conventions and the `sync-init` block: more work on a ticket (after a merge, a review follow-up, an addition) goes on the same branch as a new PR, never a second branch. Only the ticket's first PR moves its status, so a follow-up PR leaves a DONE ticket DONE.
+- One ticket, one repository. Cross-repo work is a parent ticket without repository plus one child per repository; branches and PRs always use the child's key. Legacy multi-repo tickets keep the old behavior (the same branch name in each repo, one PR per repo) until they are split.
+- New `sync-tickets/references/subtasks.md`: the parent/child rules (one level, parent without repository or links, status computed from children, no re-parenting over MCP) and how each skill works with them.
+- `sync-start-ticket` checks `origin` against the ticket's single `repository` and stops on a parent ticket to pick a child; it still accepts a DONE ticket for more work on the same branch (merging `origin/<default>` first, or recreating a branch deleted after its merge).
+- `sync-complete-ticket` opens a new PR when the branch's earlier PR is merged and no longer expects IN_REVIEW from a later PR; a parent is completed through its children, and the per-repo run remains only for legacy multi-repo tickets.
+- `sync-tickets` and `sync-plan-from-doc` set a single `repository` on `create_ticket`; `sync-plan-from-doc` plans cross-repo work as one parent row without repository plus one child row per repo, parents created before children.
+- `sync-run-ticket` skips a parent ticket with `[BLOCKED]`: nobody can pick a child unattended.
+- `sync-projects` names `post_project_update` for the optional project update post (an explicit yes is required; progress is computed from tickets). The tool is now listed in compat.json.
+
 ## 0.4.1 - 2026-10-27
 
 Requires: tool MCP add_ticket_comment, change_ticket_status, create_document, create_milestone, create_project, create_ticket, get_document, get_my_work_summary, get_profile, get_project_dates, get_ticket, get_ticket_branch_name, get_ticket_dates, link_repository, list_assignees, list_document_spaces, list_milestones, list_my_pending_reviews, list_projects, list_repositories, list_ticket_comments, publish_document, search_documents, search_tickets, update_document, update_project_dates, update_ticket, update_ticket_dates
