@@ -21,6 +21,7 @@
     "list_projects",
     "list_repositories",
     "list_ticket_comments",
+    "post_project_update",
     "publish_document",
     "search_documents",
     "search_tickets",
