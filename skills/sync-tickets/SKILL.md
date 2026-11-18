@@ -56,6 +56,6 @@ Comment at start, at each phase boundary and when blocked. Keep one ticket: `[PL
 
 1. `search_tickets`, then `get_ticket` for current fields.
 2. Show before → after, then `update_ticket`. An omitted field stays; `null` clears assignee, milestone or type.
-3. A description is overwritten, so keep what should survive.
+3. Descriptions are overwritten; keep what should survive.
 
 `update_ticket` cannot change status or project; a wrong project means a new ticket.
