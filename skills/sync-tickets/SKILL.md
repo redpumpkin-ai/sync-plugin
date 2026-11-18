@@ -1,6 +1,6 @@
 ---
 name: sync-tickets
-description: Use when the user wants to plan work into a Sync by RedPumpkin ticket, create a ticket before coding, log progress or a finished phase on a ticket, add a comment, record a blocker or a hand-off, split a ticket into phases, or groom a ticket (title, description, priority, assignee, milestone, backlog clean-up).
+description: Use when the user wants to plan work into a Sync by RedPumpkin ticket, create a ticket before coding, log progress or a finished phase on a ticket, add a comment, record a blocker or a hand-off, split a ticket into phases or subtasks, or groom a ticket (title, description, priority, assignee, milestone, backlog clean-up).
 # Shown on Settings → MCP → Skills in Sync; not used for triggering.
 metadata:
   summary: "Plans and creates a ticket (with a duplicate check), logs progress, phases, blockers and hand-offs as comments, and grooms tickets."
@@ -30,7 +30,7 @@ Ticket status follows GitHub; nothing here moves it past BACKLOG or TODO.
 - **Project:** the row of the repo in the `AGENTS.md` Projects table; else `list_projects` (not CLOSED), ask if unclear. Never invent project, milestone or assignee names.
 - **Priority:** NORMAL unless the work says otherwise.
 - **Type:** uppercase Conventional Commit type (FEAT, FIX, REFACTOR, PERF, TEST, DOCS, STYLE, BUILD, CI, CHORE). It prefixes the branch name, so set it on create.
-- **Repositories:** every repo the work touches (`repositories`).
+- **Repository:** one repo (`repository`); cross-repo: parent + child per repo (`references/subtasks.md`).
 
 ## Plan and create
 
@@ -56,6 +56,6 @@ Comment at start, at each phase boundary and when blocked. Keep one ticket: `[PL
 
 1. `search_tickets`, then `get_ticket` for current fields.
 2. Show before → after, then `update_ticket`. An omitted field stays; `null` clears assignee, milestone or type.
-3. A description is overwritten, so keep what should survive.
+3. Descriptions are overwritten; keep what should survive.
 
 `update_ticket` cannot change status or project; a wrong project means a new ticket.

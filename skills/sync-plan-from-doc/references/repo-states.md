@@ -1,6 +1,6 @@
 # Repo states
 
-Ask the user whether the project already has a GitHub repository. Linked candidates come from `list_repositories` with `project`; unlinked ones need it without `project` or with a `query`. The installation's `accountLogin` is the owner; with several installations, ask which one. Nothing is created or linked before the plan table is approved.
+Ask the user whether the project already has a GitHub repository. Linked candidates come from `list_repositories` with `project`; unlinked ones need it without `project` or with a `query`. The installation's `accountLogin` is the owner; with several installations, ask which one. Nothing is created or linked before the plan table is approved. A project may link several repositories, but each ticket gets at most one (`repository`); cross-repo work is planned as a parent without repository plus one child per repo (plan-table.md).
 
 `gh` runs on the developer's machine and is the only way a repository is created: the Sync server and the GitHub App never create one. If `gh` is missing or not logged in, say so and mark the repo row "later".
 

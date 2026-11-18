@@ -60,8 +60,9 @@ Open the pull request from the ticket branch: the server links the PR to the tic
 
 - A ticket has exactly one branch, the name from `get_ticket_branch_name`. Never make a second branch for the same ticket (no `-v2`, `-part2` or `-followup` suffix).
 - More work on the same ticket (a fix after merge, a review follow-up, an addition) goes on that same branch as a new PR. If the earlier PR was merged and the remote branch still exists, merge `origin/<default>` into it first so the new PR shows only the new work. If the branch was deleted after the merge, create it again from `origin/<default>` with the same name. Never force-push.
-- A ticket that touches several repositories (`repositories` in `get_ticket`) uses the same branch name in each repo and gets one PR per repo.
-- Only the ticket's first PR moves its status. Later PRs, in the same repo or another one, are linked to the ticket but do not move it: a DONE ticket stays DONE while a follow-up PR is open. Tell the user when that applies instead of changing the status by hand.
+- One ticket, one repository (`repository` in `get_ticket`). Cross-repo work: create a parent ticket without a repository and one child ticket per repository; branches and PRs always use the child's key. Subtask rules: `../sync-tickets/references/subtasks.md`.
+- Legacy tickets that still carry several repositories (`repositories`) keep the old behavior — the same branch name in each repo, one PR per repo — until they are split into a parent and children.
+- Only the ticket's first PR moves its status. Later PRs are linked to the ticket but do not move it: a DONE ticket stays DONE while a follow-up PR is open. Tell the user when that applies instead of changing the status by hand.
 
 ## Comment tags
 
