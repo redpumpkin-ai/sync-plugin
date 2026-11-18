@@ -3,6 +3,12 @@
 Changes to the Sync agent plugin. Each entry lists the Sync MCP tools the skills call
 ("Requires: tool MCP ..."); a server release must keep every listed tool available.
 
+## 0.4.3 - 2026-11-18
+
+Requires: tool MCP add_ticket_comment, change_ticket_status, create_document, create_milestone, create_project, create_ticket, get_document, get_my_work_summary, get_profile, get_project_dates, get_ticket, get_ticket_branch_name, get_ticket_dates, link_repository, list_assignees, list_document_spaces, list_milestones, list_my_pending_reviews, list_projects, list_repositories, list_ticket_comments, post_project_update, publish_document, search_documents, search_tickets, update_document, update_project_dates, update_ticket, update_ticket_dates
+
+- `sync-setup` offers an optional `pre-push` git hook (`references/commit-rules.md`) that rejects a ticket branch whose name is longer than 30 characters or is not lowercase `[type/]key-number[-slug]`, so a name an agent invented is stopped before the Sync server links it to the ticket. Install it like the commit-msg hook; `git push --no-verify` skips it.
+
 ## 0.4.2 - 2026-11-18
 
 Requires: tool MCP add_ticket_comment, change_ticket_status, create_document, create_milestone, create_project, create_ticket, get_document, get_my_work_summary, get_profile, get_project_dates, get_ticket, get_ticket_branch_name, get_ticket_dates, link_repository, list_assignees, list_document_spaces, list_milestones, list_my_pending_reviews, list_projects, list_repositories, list_ticket_comments, post_project_update, publish_document, search_documents, search_tickets, update_document, update_project_dates, update_ticket, update_ticket_dates
