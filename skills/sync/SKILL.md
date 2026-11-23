@@ -26,6 +26,7 @@ Lists the Sync skills. It does no work itself: answer with the table below, pick
 | Set or check ticket dates | `/sync:sync-timeline [project-key] [schedule-file]` | `$sync-timeline [project-key] [schedule-file]` |
 | Audit tickets for stale or missing content | `/sync:sync-ticket-audit [project-key-or-search]` | `$sync-ticket-audit [project-key-or-search]` |
 | Get the digest on a schedule | `/sync:sync-schedule-digest ["weekdays 09:00"]` | `$sync-schedule-digest ["weekdays 09:00"]` |
+| Connect a repo to Sync error tracking with the Sentry SDK (any language, client apps included) | `/sync:sync-error-tracking [platform-or-framework]` | `$sync-error-tracking [platform-or-framework]` |
 | Set up a repo's Sync rules (once per repo) | `/sync:sync-init [repo-path ...]` | `$sync-init [repo-path ...]` |
 | Learn how to use Sync after install (commit-message rules, skill flow, extra tools, companion skills) | `/sync:sync-setup [commit-rules\|flow\|tools\|skills]` | `$sync-setup [commit-rules\|flow\|tools\|skills]` |
 

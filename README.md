@@ -17,6 +17,7 @@ Skills that make coding agents (Claude Code, Codex) follow the team's Sync by Re
 | `sync-timeline` | Map a schedule onto ticket dates and flag conflicts with dependencies, milestones and the project dates. |
 | `sync-ticket-audit` | Review tickets for stale descriptions, missing criteria, dates or milestones, and mismatched status. Read-only. |
 | `sync-setup [commit-rules\|flow\|tools\|skills]` | Show commit-message rules per tool (with an optional commit-msg hook), the skill flow, extra tools some skills need and companion skills. Read-only. |
+| `sync-error-tracking [platform-or-framework]` | Connect a repo to Sync error tracking with the official Sentry SDK for its language, client-only apps such as Flutter or browser apps included: DSN from the environment, errors only, no uploads to sentry.io, readable stack traces. |
 | `sync-schedule-digest ["weekdays 09:00"]` | Run `sync-digest` on a schedule as a Claude cloud routine, a Claude Desktop task or a Codex scheduled task. You have to invoke it yourself. |
 
 In Claude Code, skills are prefixed with the plugin name, e.g. `/sync:sync-start-ticket SYN-29`.
