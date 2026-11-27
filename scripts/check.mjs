@@ -250,7 +250,20 @@ function readVersions(root) {
     if (typeof header !== "string" || !header.startsWith(prefix)) throw new Error(`header harus diawali ${prefix}`);
     return header.slice(prefix.length);
   };
-  tryRead(".mcp.json (X-Sync-Plugin)", headerOf(".mcp.json", "claude-code/"));
+  // Claude Code: header dari headersHelper, bukan `headers` statis (statis mengubah kunci token tiap rilis, SYN-215).
+  tryRead(".mcp.json (headersHelper)", () => {
+    const helper = readJson(root, ".mcp.json").mcpServers.sync;
+    if (helper.headers) throw new Error("jangan pakai headers statis, pakai headersHelper");
+    if (helper.headersHelper !== 'node "${CLAUDE_PLUGIN_ROOT}/scripts/mcp-headers.mjs"') throw new Error("headersHelper harus menjalankan scripts/mcp-headers.mjs");
+    const run = spawnSync(process.execPath, [path.join(root, "scripts", "mcp-headers.mjs")], {
+      env: { ...process.env, CLAUDE_PLUGIN_ROOT: root },
+      encoding: "utf8",
+    });
+    if (run.status !== 0) throw new Error(`mcp-headers.mjs gagal: ${run.stderr.trim()}`);
+    const header = JSON.parse(run.stdout)["X-Sync-Plugin"];
+    if (typeof header !== "string" || !header.startsWith("claude-code/")) throw new Error("header harus diawali claude-code/");
+    return header.slice("claude-code/".length);
+  });
   tryRead(".codex-plugin/mcp.json (X-Sync-Plugin)", headerOf(".codex-plugin/mcp.json", "codex/"));
   return sources;
 }
