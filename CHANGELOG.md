@@ -3,13 +3,13 @@
 Changes to the Sync agent plugin. Each entry lists the Sync MCP tools the skills call
 ("Requires: tool MCP ..."); a server release must keep every listed tool available.
 
-## 0.4.4 - belum dirilis
+## 0.4.4 - 2026-11-27
 
 Requires: tool MCP add_ticket_comment, change_ticket_status, create_document, create_milestone, create_project, create_ticket, get_document, get_my_work_summary, get_profile, get_project_dates, get_ticket, get_ticket_branch_name, get_ticket_dates, link_repository, list_assignees, list_document_spaces, list_milestones, list_my_pending_reviews, list_projects, list_repositories, list_ticket_comments, post_project_update, publish_document, search_documents, search_tickets, update_document, update_project_dates, update_ticket, update_ticket_dates
 
 - Claude Code no longer asks you to sign in to Sync again after every plugin update. The plugin used to send its version in a static `X-Sync-Plugin` header in `.mcp.json`, and Claude Code keys stored MCP tokens by a hash of the server's type, URL and headers, so each release made the saved token unreachable. The version now comes from `headersHelper` (`scripts/mcp-headers.mjs`, reading `plugin.json`), which is not part of that key. Everyone signs in once more after updating to this version, then never again because of an update. Codex is unchanged.
 
-## 0.4.3 - belum dirilis
+## 0.4.3 - 2026-11-18
 
 Requires: tool MCP add_ticket_comment, change_ticket_status, create_document, create_milestone, create_project, create_ticket, get_document, get_my_work_summary, get_profile, get_project_dates, get_ticket, get_ticket_branch_name, get_ticket_dates, link_repository, list_assignees, list_document_spaces, list_milestones, list_my_pending_reviews, list_projects, list_repositories, list_ticket_comments, post_project_update, publish_document, search_documents, search_tickets, update_document, update_project_dates, update_ticket, update_ticket_dates
 
