@@ -82,8 +82,15 @@ describe("check.mjs: repo utuh", () => {
 });
 
 describe("check.mjs: versi", () => {
-  it("merah bila header X-Sync-Plugin Claude beda versi", () => {
-    const r = mutate((d) => edit(d, ".mcp.json", (t) => t.replace(/claude-code\/\d+\.\d+\.\d+/, "claude-code/9.9.9")));
+  it("merah bila .mcp.json kembali memakai header X-Sync-Plugin statis (kunci token berubah tiap rilis)", () => {
+    const r = mutate((d) =>
+      edit(d, ".mcp.json", (t) => t.replace(/"headersHelper": "[^\n]*",/, '"headers": { "X-Sync-Plugin": "claude-code/9.9.9" },')),
+    );
+    expectRed(r, "version", "headers statis");
+  });
+
+  it("merah bila mcp-headers.mjs mencetak versi yang beda dari plugin.json", () => {
+    const r = mutate((d) => edit(d, "scripts/mcp-headers.mjs", (t) => t.replace("claude-code/${version}", "claude-code/9.9.9")));
     expectRed(r, "version", "versi tidak sama");
   });
 
